@@ -63,12 +63,14 @@ html,body{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;m
     仰角 <span id="dp">0</span>° <input id="sp" type="range" min="-30" max="40" value="0">
   </div>
   <div id="toast" class="glass"></div>
-  <div class="btns" id="btns"><button id="bTts">音声 OFF</button><button id="bPause">一時停止</button><button id="bBack">戻る</button></div>
+  <button id="bSnd" style="position:absolute;right:10px;top:max(10px,env(safe-area-inset-top));font-size:18px;background:rgba(10,14,28,.6);border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:6px 10px;color:#fff;z-index:4">🔊</button>
+  <div class="btns" id="btns"><button id="bTts">読み上げ ON</button><button id="bPause">一時停止</button><button id="bBack">戻る</button></div>
   <div id="card" class="glass"></div>
   <div id="intro">
     <h1>Sling Spot AR（仮称）</h1>
     <p>景色の気になる場所を<b>長押し</b>でロック → <b>パチンコのように引いて離す</b>と、その場所へ飛んで360°回りながら解説します。</p>
     <p style="font-size:12px;opacity:.75">候補が違うときは、引かずに指を離すと候補が出ます。正しい候補を選ぶと方位のズレが自動補正されます。</p>
+    <p style="font-size:12px;opacity:.75">🔊 効果音と解説の読み上げがあります。音が出ない場合は消音設定と音量を確認してください。</p>
     <p class="warn">⚠ 歩行中・運転中は使用しないでください。周囲の安全を確認して使用してください。</p>
     <p style="font-size:11px;opacity:.65">カメラ映像は端末外へ送信されません。周辺スポット検索のため、現在地の座標がWikipedia・Wikidataへ送信されます（保存はしません）。解説はWikipedia記事の抜粋で、正確性は保証されません。</p>
     <button class="pri" id="bStart">開始（カメラ・位置・方位を許可）</button>
@@ -149,7 +151,7 @@ const FALLBACK=[
 ];
 const D=Math.PI/180;
 const $=id=>document.getElementById(id);
-const S={state:'idle',heading:0,pitch:0,pos:{...CFG.defaultPos},demo:false,sensor:false,gotAbs:false,spots:FALLBACK.slice(),cand:[],sel:null,anchor:null,pull:0,cards:[],tts:false,paused:false,cardIdx:-1,lastFetch:null,debug:{},M:null,sensorOff:0,userOff:0,calibN:0,gotWeb:false,forceAngle:null};
+const S={state:'idle',heading:0,pitch:0,pos:{...CFG.defaultPos},demo:false,sensor:false,gotAbs:false,spots:FALLBACK.slice(),cand:[],sel:null,anchor:null,pull:0,cards:[],tts:true,paused:false,cardIdx:-1,lastFetch:null,debug:{},M:null,sensorOff:0,userOff:0,calibN:0,gotWeb:false,forceAngle:null};
 window.__S=S;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const angDiff=(a,b)=>((((a-b+540)%360)+360)%360)-180;
@@ -297,7 +299,8 @@ ov.addEventListener('pointermove',e=>{
     S.fx=clamp(e.clientX,8,innerWidth-8); S.fy=clamp(e.clientY,8,innerHeight-8); S.pull=clamp(Math.hypot(S.fx-S.anchor.x,S.fy-S.anchor.y)*S.gain,0,CFG.pullMax);
     const was=S.state; S.state='pulling'; S.finger={x:e.clientX,y:e.clientY};
     if(was==='locked'&&false)vib(5);
-    if(S.pull>=CFG.pullMin&&!S.armed){S.armed=true;vib(20)}
+    {const st=Math.floor(S.pull/CFG.pullMax*12); if(st>S.lastStep)SFX.creak(S.pull/CFG.pullMax); S.lastStep=st;}
+    if(S.pull>=CFG.pullMin&&!S.armed){S.armed=true;vib(20);SFX.armed()}
     if(!S.shakeLoop){S.shakeLoop=true;(function lp(){ if(S.state!=='pulling'){S.shakeLoop=false;return} drawOv(); requestAnimationFrame(lp); })();}
     if(S.pull<CFG.pullMin)S.armed=false;
     drawOv();
@@ -314,7 +317,7 @@ ov.addEventListener('pointercancel',()=>{clearTimeout(timer);down=null;if(S.stat
 function lock(x,y){
   const r=resolve(x,y),c=r.list; S.lockAz=r.az;
   if(!c.length){down=null;toast('スポットが見つかりません。方向を変えてもう一度');return}
-  S.cand=c; S.sel=c[0]; S.anchor={x,y}; setGain(x,y); S.fx=x; S.fy=y; S.pull=0; S.armed=false; S.finger={x,y}; S.state='locked'; vib(10);
+  S.cand=c; S.sel=c[0]; S.anchor={x,y}; setGain(x,y); S.fx=x; S.fy=y; S.pull=0; S.armed=false; S.finger={x,y}; S.state='locked'; vib(10); SFX.lock(); S.lastStep=0;
   const l=$('label'); l.style.display='block';
   setLabel();
   $('hint').textContent='そのまま後ろへ引いて、離すと飛びます';
@@ -339,7 +342,7 @@ function pick(i){
   $('hint').textContent='画面を押してそのまま引くと発射';
   clearTimeout(chooseT); chooseT=setTimeout(()=>{ if(S.state==='ready')cancelLock(); },8000);
 }
-function cancelLock(){ clearTimeout(chooseT); $('chips').style.display='none'; S.state='idle'; S.sel=null; S.pull=0; $('label').style.display='none'; $('hint').textContent=HINT; drawOv(); }
+function cancelLock(){ if(S.state!=='idle')SFX.cancel(); clearTimeout(chooseT); $('chips').style.display='none'; S.state='idle'; S.sel=null; S.pull=0; $('label').style.display='none'; $('hint').textContent=HINT; drawOv(); }
 const HINT='気になる場所を長押ししてロック';
 function setGain(x,y){
   // 一番広い方向の余白を基準に増幅率を決める（画面端でロックしても最大まで引ける）
@@ -361,15 +364,14 @@ function drawOv(){
   const a=S.anchor,p=S.pull,k=clamp(p/CFG.pullMax,0,1),on=p>=CFG.pullMin,H=innerHeight;
   const col=tensionColor(k), sh=on?(.5+4*k):0, jx=(Math.random()-.5)*sh, jy=(Math.random()-.5)*sh;
   // Y字スリング: 二股の先端はアンカーの左右、柄は下へ
-  const span=46, tipL={x:a.x-span,y:a.y+18}, tipR={x:a.x+span,y:a.y+18}, base={x:a.x,y:a.y+60};
-  const fork=`<path d="M${base.x},${Math.min(H,base.y+70)} L${base.x},${base.y} M${base.x},${base.y} L${tipL.x},${tipL.y} M${base.x},${base.y} L${tipR.x},${tipR.y}" stroke="rgba(120,70,30,.85)" stroke-width="10" stroke-linecap="round" fill="none"/>`;
+  const span=30+6*k, tipL={x:a.x-span,y:a.y}, tipR={x:a.x+span,y:a.y}, fork='';
   const P={x:S.fx??a.x,y:S.fy??a.y}, w=Math.max(2,7-5*k), r=13+5*k;
   let body='';
   if(S.fireT==null){
     // 後ろのゴム → 弾 → 前のゴム（奥行き感）
     const back=`<line x1="${tipR.x+jx}" y1="${tipR.y+jy}" x2="${P.x}" y2="${P.y}" stroke="${col}" stroke-width="${w}" stroke-linecap="round" opacity=".75"/>`;
     const front=`<line x1="${tipL.x+jx}" y1="${tipL.y+jy}" x2="${P.x}" y2="${P.y}" stroke="${col}" stroke-width="${w+1}" stroke-linecap="round"/>`;
-    const ball=`<circle cx="${P.x}" cy="${P.y}" r="${r+3}" fill="rgba(60,30,10,.9)"/><circle cx="${P.x}" cy="${P.y}" r="${r}" fill="${col}"/><circle cx="${P.x-r/3}" cy="${P.y-r/3}" r="${r/3}" fill="rgba(255,255,255,.6)"/>`;
+    const ball=`<circle cx="${P.x}" cy="${P.y}" r="${r+3}" fill="rgba(0,0,0,.35)"/><circle cx="${P.x}" cy="${P.y}" r="${r}" fill="${col}"/><circle cx="${P.x-r/3}" cy="${P.y-r/3}" r="${r/3}" fill="rgba(255,255,255,.6)"/>`;
     let dots='';
     if(p>12){ const A=arcFrom(P),n=14; for(let i=1;i<=n;i++){const q=bez(A.p0,A.p1,A.p2,i/n);dots+=`<circle cx="${q.x}" cy="${q.y}" r="${(5-3.5*i/n)*(on?1:.7)}" fill="#fff" opacity="${(on?.95:.45)*(1-.6*i/n)}"/>`} }
     body=fork+back+ball+front+dots;
@@ -392,12 +394,55 @@ function drawOv(){
   <text x="30" y="${gy-10}" fill="#fff" font-size="12" style="paint-order:stroke" stroke="rgba(0,0,0,.5)" stroke-width="3">${on?'パワー '+Math.round(k*100)+'%':'もっと引く'}</text>`;
 }
 function fire(){
-  S.state='firing'; S.fireArc=arcFrom({x:S.fx,y:S.fy}); S.fireT=0; const t0=performance.now(), dur=650-250*clamp(S.pull/CFG.pullMax,0,1);
+  S.state='firing'; S.fireArc=arcFrom({x:S.fx,y:S.fy}); S.fireT=0; const t0=performance.now(), kk=clamp(S.pull/CFG.pullMax,0,1), dur=650-250*kk;
+  SFX.release(kk); SFX.whoosh(dur/1000+clamp(4200-(S.pull-CFG.pullMin)*(2400/(CFG.pullMax-CFG.pullMin)),1800,4200)/1000*.8);
   (function f(now){
     const t=clamp((now-t0)/dur,0,1); S.fireT=t*t*(3-2*t); drawOv();
     if(t<1)requestAnimationFrame(f); else {S.fireT=null; launch();}
   })(t0);
 }
+// ---------- sound (Web Audio 合成。外部ファイル不要) ----------
+const SND={ctx:null,on:true,noise:null};
+function audioInit(){
+  try{ if(!SND.ctx){SND.ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const n=SND.ctx.createBuffer(1,SND.ctx.sampleRate,SND.ctx.sampleRate),d=n.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;SND.noise=n;}
+    if(SND.ctx.state==='suspended')SND.ctx.resume();
+  }catch(e){}
+}
+function tone(o){ // {f,f2,type,dur,vol,at}
+  if(!SND.on||!SND.ctx)return; const c=SND.ctx,t=c.currentTime+(o.at||0);
+  const os=c.createOscillator(),g=c.createGain(); os.type=o.type||'sine';
+  os.frequency.setValueAtTime(o.f,t); if(o.f2)os.frequency.exponentialRampToValueAtTime(o.f2,t+o.dur);
+  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(o.vol||.2,t+.008); g.gain.exponentialRampToValueAtTime(0.0001,t+o.dur);
+  os.connect(g).connect(c.destination); os.start(t); os.stop(t+o.dur+.02);
+}
+function noiseSweep(f1,f2,dur,vol){
+  if(!SND.on||!SND.ctx)return; const c=SND.ctx,t=c.currentTime;
+  const src=c.createBufferSource(),bp=c.createBiquadFilter(),g=c.createGain(); src.buffer=SND.noise; src.loop=true;
+  bp.type='bandpass'; bp.Q.value=1.2; bp.frequency.setValueAtTime(f1,t); bp.frequency.exponentialRampToValueAtTime(f2,t+dur);
+  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+dur*.35); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  src.connect(bp).connect(g).connect(c.destination); src.start(t); src.stop(t+dur+.05);
+}
+const SFX={
+  lock(){tone({f:1320,dur:.06,vol:.12});tone({f:1980,dur:.08,vol:.08,at:.05})},
+  creak(k){tone({f:140+520*k,type:'sawtooth',dur:.035,vol:.05+.06*k})},
+  armed(){tone({f:2200,dur:.05,vol:.1})},
+  cancel(){tone({f:520,f2:260,dur:.15,vol:.08})},
+  release(k){tone({f:380+300*k,f2:90,type:'triangle',dur:.32,vol:.28});noiseSweep(3000,600,.12,.12)},
+  whoosh(d){noiseSweep(350,2600,d,.16)},
+  arrive(){tone({f:1046.5,dur:.9,vol:.12});tone({f:1568,dur:1.1,vol:.09,at:.12});tone({f:2093,dur:1.2,vol:.05,at:.24})}
+};
+// ---------- voice (日本語読み上げ) ----------
+let jaVoice=null;
+function pickVoice(){ try{const v=speechSynthesis.getVoices().filter(v=>/^ja/i.test(v.lang));jaVoice=v.find(x=>/Kyoko|O-ren|Siri|Google/i.test(x.name))||v[0]||null;}catch(e){} }
+if(window.speechSynthesis){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
+function say(text,onend){
+  if(!window.speechSynthesis||!S.tts){onend&&onend();return}
+  speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang='ja-JP'; if(jaVoice)u.voice=jaVoice; u.rate=1.05;
+  u.onend=()=>onend&&onend(); u.onerror=()=>onend&&onend(); speechSynthesis.speak(u);
+}
+function unlockVoice(){ try{ if(window.speechSynthesis){const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);} }catch(e){} }
+
 // ---------- explanation ----------
 function clip(t,max){
   const ss=t.replace(/\s+/g,' ').split(/(?<=。)/).map(x=>x.trim()).filter(Boolean); let o='';
@@ -454,7 +499,7 @@ try{
 
 let token=0;
 async function launch(){
-  const sp=S.sel,pull=S.pull,my=++token; S.state='flying';
+  const sp=S.sel,pull=S.pull,my=++token; S.cur=sp; S.state='flying';
   $('label').style.display='none'; $('hint').textContent=''; ov.innerHTML='';
   const exp=explain(sp);
   const dur=clamp(4200-(pull-CFG.pullMin)*(2400/(CFG.pullMax-CFG.pullMin)),1800,4200);
@@ -473,13 +518,20 @@ async function launch(){
   $('bPause').textContent='一時停止'; $('btns').style.display='flex';
   const c=$('card'); c.style.display='block';
   c.innerHTML=`<h2>${esc(sp.name)}</h2><div class="sub">${fmtD(sp.d)} ／ 方位 ${Math.round(b)}°${sp.kind==='mt'?' ／ 標高 '+Math.round(sp.h)+' m':''}</div><div id="cb"></div><div class="dots">${S.cards.map(()=>'<i></i>').join('')}</div><div class="src">${res.src?`出典: <a href="${res.src}" target="_blank" rel="noopener">Wikipedia</a> ／ `:''}内容は要確認</div>`;
-  setCard(0); orbit(my);
+  SFX.arrive(); S.cardIdx=-1; setTimeout(()=>{ if(my===token)setCard(0,my); },700); orbit(my);
 }
-function setCard(i){
-  if(i===S.cardIdx||!S.cards.length)return; S.cardIdx=i; const c=S.cards[i];
+function setCard(i,my){
+  if(i===S.cardIdx||!S.cards.length||i>=S.cards.length)return; S.cardIdx=i; const c=S.cards[i];
   $('cb').innerHTML=`<div class="ch">${esc(c.h)}</div><div class="tx">${esc(c.t)}</div>`;
   document.querySelectorAll('#card .dots i').forEach((d,k)=>d.classList.toggle('on',k===i));
-  if(S.tts&&window.speechSynthesis){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(c.t);u.lang='ja-JP';speechSynthesis.speak(u)}
+  if(S.tts){ // 読み上げ中は音声に合わせてカードを送る
+    const tk=token, txt=(i===0?S.cur.name+'。':'')+c.h+'。'+c.t; let done=false;
+    const next=()=>{ if(done)return; done=true; clearTimeout(S.sayT); if(tk!==token||S.state!=='orbit'||!S.tts)return;
+      const go=()=>{ if(tk!==token)return; if(S.paused){setTimeout(go,500);return} if(i+1<S.cards.length)setCard(i+1); };
+      setTimeout(go,600); };
+    clearTimeout(S.sayT); S.sayT=setTimeout(next,4000+txt.length*220); // 読み上げが動かない端末向けの保険
+    say(txt,next);
+  }
 }
 function orbit(my){
   let el=0,last=performance.now(); const b0=map?map.getBearing():0;
@@ -488,7 +540,7 @@ function orbit(my){
     const dt=Math.max(0,now-last); last=Math.max(last,now); if(!S.paused)el+=dt;
     const fr=el/CFG.orbitMs; S.orbitFrac=fr;
     if(map){try{map.jumpTo({bearing:b0+360*fr})}catch(e){}}
-    setCard(clamp(Math.floor((((fr%1)+1)%1)*S.cards.length),0,S.cards.length-1));
+    if(!S.tts&&S.cardIdx>=0)setCard(clamp(Math.floor((((fr%1)+1)%1)*S.cards.length),0,S.cards.length-1));
     requestAnimationFrame(f);
   })(last);
 }
@@ -498,16 +550,18 @@ function back(){
   $('map').classList.remove('show'); $('ar').classList.remove('away'); $('hint').textContent=HINT; S.cards=[];
 }
 $('bBack').onclick=back;
-$('bPause').onclick=()=>{S.paused=!S.paused;$('bPause').textContent=S.paused?'再開':'一時停止'};
-$('bTts').onclick=()=>{S.tts=!S.tts;$('bTts').textContent='音声 '+(S.tts?'ON':'OFF');if(S.tts)S.cardIdx=-1;else if(window.speechSynthesis)speechSynthesis.cancel()};
+$('bPause').onclick=()=>{S.paused=!S.paused;$('bPause').textContent=S.paused?'再開':'一時停止';try{S.paused?speechSynthesis.pause():speechSynthesis.resume()}catch(e){}};
+$('bTts').onclick=()=>{S.tts=!S.tts;$('bTts').textContent='読み上げ '+(S.tts?'ON':'OFF');if(window.speechSynthesis)speechSynthesis.cancel();if(S.tts&&S.state==='orbit'){const i=S.cardIdx;S.cardIdx=-1;setCard(Math.max(0,i))}};
+$('bSnd').onclick=()=>{SND.on=!SND.on;$('bSnd').textContent=SND.on?'🔊':'🔇';audioInit()};
 
 // ---------- misc ----------
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function fmtD(d){return d>=1000?(d/1000).toFixed(1)+' km':Math.round(d)+' m'}
 let tt=null;function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(tt);tt=setTimeout(()=>t.style.display='none',2600)}
-setInterval(()=>{ const idle=['idle','locked','pulling','choose','ready','firing'].includes(S.state); $('hud').style.display=idle?'block':'none'; $('demo').style.display=(S.demo&&S.state==='idle')?'block':'none'; if(S.demo&&S.state==='idle'){$('sh').value=Math.round(S.heading)%360;$('dh').textContent=Math.round(S.heading)%360;} $('hud').textContent=`方位 ${Math.round(S.heading)}° 仰角 ${Math.round(S.pitch)}° ${S.demo?'[デモ]':''}${S.userOff?' 補正'+(S.userOff>0?'+':'')+Math.round(S.userOff)+'°':''} 精度 ${S.pos.acc?('±'+Math.round(S.pos.acc)+'m'):'-'} スポット ${S.spots.length}`; },300);
+setInterval(()=>{ const idle=['idle','locked','pulling','choose','ready','firing'].includes(S.state); $('hud').style.display=idle?'block':'none'; $('bSnd').style.display=idle?'block':'none'; $('demo').style.display=(S.demo&&S.state==='idle')?'block':'none'; if(S.demo&&S.state==='idle'){$('sh').value=Math.round(S.heading)%360;$('dh').textContent=Math.round(S.heading)%360;} $('hud').textContent=`方位 ${Math.round(S.heading)}° 仰角 ${Math.round(S.pitch)}° ${S.demo?'[デモ]':''}${S.userOff?' 補正'+(S.userOff>0?'+':'')+Math.round(S.userOff)+'°':''} 精度 ${S.pos.acc?('±'+Math.round(S.pos.acc)+'m'):'-'} スポット ${S.spots.length}`; },300);
 $('hint').textContent='';
 async function begin(demo){
+  audioInit(); unlockVoice();
   $('intro').style.display='none'; $('hint').textContent=HINT;
   if(demo){ enterDemo(); $('cam').style.display='none'; refreshSpots(); return; }
   await startSensors(); await startCamera(); startGeo();
