@@ -45,6 +45,85 @@ html,body{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;m
 #chips button.on{background:#2f7cf6;border-color:#2f7cf6}
 #warn{position:absolute;left:10px;top:max(44px,calc(env(safe-area-inset-top) + 36px));max-width:min(92vw,520px);padding:6px 10px;font-size:12px;color:#ffd37a;display:none;pointer-events:none}
 #bEye{position:absolute;right:58px;top:max(10px,env(safe-area-inset-top));font-size:12px;background:rgba(10,14,28,.6);border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:8px 10px;color:#fff;z-index:4}
+#bTrain{position:absolute;right:150px;top:max(10px,env(safe-area-inset-top));font-size:12px;background:rgba(10,14,28,.6);border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:8px 10px;color:#fff;z-index:4}
+
+/* ===== スポット図鑑 ===== */
+#bDex{position:absolute;right:16px;bottom:calc(env(safe-area-inset-bottom) + 18px);width:66px;height:66px;border-radius:50%;border:4px solid #fff;background:radial-gradient(circle at 35% 30%,#5be3d0,#1aa39a 60%,#0b6f7a);box-shadow:0 6px 18px rgba(0,0,0,.45),inset 0 -4px 0 rgba(0,0,0,.15);color:#fff;font-size:28px;z-index:5;display:none}
+#bDex .n{position:absolute;right:-6px;top:-6px;min-width:24px;height:24px;border-radius:12px;background:#ff5a7a;border:2px solid #fff;font-size:12px;font-weight:800;line-height:20px;padding:0 5px}
+#dex{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;background:rgba(4,20,30,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);font-family:-apple-system,"Hiragino Maru Gothic ProN","Hiragino Sans",sans-serif}
+#dex.show{display:flex}
+.book{position:relative;width:min(94vw,760px);height:min(88vh,1040px);perspective:2200px}
+.pages{position:absolute;inset:0;border-radius:18px 26px 26px 18px;background:linear-gradient(90deg,#e9f6f4 0,#fff 4%,#fff 100%);box-shadow:0 20px 50px rgba(0,0,0,.5),inset 10px 0 18px rgba(0,0,0,.08);overflow:hidden;color:#20343a;transform:scale(.94);opacity:.6;transition:transform .7s .25s,opacity .5s .25s}
+#dex.open .pages{transform:none;opacity:1}
+.cover{position:absolute;inset:0;transform-origin:left center;transform-style:preserve-3d;transition:transform 1s cubic-bezier(.6,.05,.3,1);z-index:3;pointer-events:none}
+#dex.open .cover{transform:rotateY(-176deg)}
+.cover>div{position:absolute;inset:0;border-radius:18px 26px 26px 18px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.cover .front{background:radial-gradient(circle at 70% 20%,#7cf2de 0,#1fb3a5 35%,#0d6e86 75%,#0a4d68);box-shadow:inset -14px 0 0 rgba(255,255,255,.12),inset 0 0 0 6px rgba(255,255,255,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center}
+.cover .front .emb{width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.18);border:6px solid #fff;display:flex;align-items:center;justify-content:center;font-size:74px;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+.cover .front h1{font-size:34px;font-weight:900;letter-spacing:.06em;margin:22px 0 4px;text-shadow:0 3px 0 rgba(0,0,0,.2)}
+.cover .front p{margin:0;font-size:14px;opacity:.9}
+.cover .back{transform:rotateY(180deg);background:#cfeee9}
+.dx-head{background:linear-gradient(135deg,#29c7b4,#1677c9);color:#fff;padding:calc(env(safe-area-inset-top) + 14px) 18px 14px;display:flex;align-items:center;gap:14px}
+.dx-lv{width:58px;height:58px;border-radius:50%;background:#fff;color:#1677c9;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;box-shadow:0 3px 0 rgba(0,0,0,.15)}
+.dx-lv small{font-size:10px;margin-bottom:-4px}.dx-lv b{font-size:24px}
+.dx-xp{flex:1}.dx-xp .t{font-weight:800;font-size:16px}.dx-xp .bar{height:10px;border-radius:5px;background:rgba(255,255,255,.35);margin-top:6px;overflow:hidden}.dx-xp .bar i{display:block;height:100%;background:#fff;border-radius:5px}
+.dx-x{width:44px;height:44px;border-radius:50%;border:3px solid #fff;background:rgba(255,255,255,.2);color:#fff;font-size:20px;font-weight:900}
+.dx-tabs{display:flex;gap:8px;overflow-x:auto;padding:12px 14px 6px;scrollbar-width:none}
+.dx-tabs button{flex:none;border:none;border-radius:999px;padding:8px 14px;font:inherit;font-weight:800;font-size:13px;background:#e6f3f1;color:#2b5b62}
+.dx-tabs button.on{background:#1aa39a;color:#fff;box-shadow:0 3px 0 #0d6e6a}
+.dx-tags{display:flex;gap:6px;overflow-x:auto;padding:4px 14px 8px}
+.dx-tags button{flex:none;border:2px solid #cfe5e2;background:#fff;border-radius:999px;padding:4px 10px;font:inherit;font-size:12px;color:#2b5b62}
+.dx-tags button.on{border-color:#ff8a3d;background:#fff3ea;color:#c4561a;font-weight:800}
+#dexPage{position:absolute;left:0;right:0;bottom:0;overflow:auto;transform-origin:left center;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+#dexPage.flipin{animation:flipin .55s cubic-bezier(.3,.7,.3,1)}
+#dexPage.flipinR{transform-origin:right center;animation:flipinR .55s cubic-bezier(.3,.7,.3,1)}
+@keyframes flipin{from{transform:perspective(1800px) rotateY(-95deg);opacity:.2}to{transform:none;opacity:1}}
+@keyframes flipinR{from{transform:perspective(1800px) rotateY(95deg);opacity:.2}to{transform:none;opacity:1}}
+.dx-sec{padding:4px 16px 2px;font-weight:900;color:#1677c9;display:flex;justify-content:space-between;align-items:center}
+.dx-medal{font-size:12px;color:#6b7f84;font-weight:700}
+.dx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:10px 16px 30px}
+.dx-card{background:#fff;border-radius:18px;box-shadow:0 3px 0 #d9ebe8,0 6px 14px rgba(0,60,70,.1);padding:12px 10px 10px;text-align:center;border:none;font:inherit;color:inherit;position:relative}
+.dx-card .no{position:absolute;left:10px;top:8px;font-size:11px;font-weight:800;color:#9bb3b7}
+.dx-card .ph{width:92px;height:92px;margin:8px auto 8px;border-radius:50%;background:#e6f3f1 center/cover no-repeat;border:4px solid var(--gc);display:flex;align-items:center;justify-content:center;font-size:40px}
+.dx-card .nm{font-weight:800;font-size:13px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.dx-card .tg{font-size:10px;color:#c4561a;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dx-empty{padding:40px 24px;text-align:center;color:#6b7f84;line-height:1.8}
+.dx-det .hero{height:260px;background:#bfe3de center/cover no-repeat;position:relative;display:flex;align-items:center;justify-content:center;font-size:90px}
+.dx-det .hero .no{position:absolute;left:14px;bottom:12px;font-size:14px;background:rgba(255,255,255,.92);border-radius:999px;padding:4px 12px;font-weight:900;color:#1677c9}
+.dx-det .body{padding:16px 18px 30px}
+.dx-det h2{margin:0 0 6px;font-size:24px;font-weight:900}
+.dx-chip{display:inline-block;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:800;color:#fff;margin:0 6px 6px 0}
+.dx-det .st{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.dx-det .st div{background:#f1f8f7;border-radius:12px;padding:8px;text-align:center;font-size:11px;color:#6b7f84}.dx-det .st b{display:block;font-size:16px;color:#20343a}
+.dx-det p{line-height:1.8;font-size:14px}
+.dx-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.dx-btns button,.dx-btns a{flex:1;min-width:120px;text-align:center;text-decoration:none;border:none;border-radius:14px;padding:12px;font:inherit;font-weight:900;font-size:14px;color:#fff;background:linear-gradient(#2fd0bd,#169c90);box-shadow:0 4px 0 #0d6e6a}
+.dx-btns .sub{background:linear-gradient(#59a8ff,#1677c9);box-shadow:0 4px 0 #0f4f8a}
+.dx-btns .del{background:#fff;color:#c44;box-shadow:0 0 0 2px #f0c9c9 inset;flex:0 0 auto}
+.dx-back{position:sticky;top:0;z-index:2;margin:10px;border:none;border-radius:999px;padding:8px 14px;font:inherit;font-weight:800;background:rgba(255,255,255,.95);box-shadow:0 2px 8px rgba(0,0,0,.15);color:#1677c9}
+#tagSheet{position:fixed;inset:0;z-index:30;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.35)}
+#tagSheet.show{display:flex}
+#tagSheet .sh{width:min(100vw,620px);background:#fff;color:#20343a;border-radius:22px 22px 0 0;padding:18px 18px calc(env(safe-area-inset-bottom) + 18px);animation:up .3s}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+#tagSheet h3{margin:0 0 10px;font-weight:900}
+#tagSheet .chips{display:flex;flex-wrap:wrap;gap:8px}
+#tagSheet .chips button{border:2px solid #cfe5e2;background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;color:#2b5b62}
+#tagSheet .chips button.on{border-color:#ff8a3d;background:#ff8a3d;color:#fff}
+#tagSheet .row{display:flex;gap:8px;margin-top:12px}#tagSheet input{flex:1;font:inherit;font-size:16px;border:2px solid #cfe5e2;border-radius:12px;padding:10px}
+#tagSheet .row button,#tagSheet .ok{border:none;border-radius:12px;padding:10px 16px;font:inherit;font-weight:900;color:#fff;background:#1aa39a}
+#tagSheet .ok{width:100%;margin-top:14px;padding:14px;background:linear-gradient(#59a8ff,#1677c9)}
+#got{position:fixed;inset:0;z-index:15;display:none;align-items:center;justify-content:center;pointer-events:none}
+#got.show{display:flex}
+#got .bx{text-align:center;color:#fff;animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
+#got .ring{width:150px;height:150px;margin:0 auto;border-radius:50%;border:6px solid #fff;background:radial-gradient(circle at 35% 30%,#7cf2de,#1aa39a 60%,#0b6f7a);display:flex;align-items:center;justify-content:center;font-size:70px;box-shadow:0 0 0 0 rgba(124,242,222,.8);animation:burst 1.2s ease-out .2s 2}
+#got .t1{font-size:34px;font-weight:900;margin-top:14px;text-shadow:0 3px 0 rgba(0,0,0,.35),0 0 18px rgba(0,0,0,.4)}
+#got .t2{font-size:15px;font-weight:700;text-shadow:0 2px 6px rgba(0,0,0,.6)}
+@keyframes pop{from{transform:scale(.2);opacity:0}to{transform:none;opacity:1}}
+@keyframes burst{to{box-shadow:0 0 0 60px rgba(124,242,222,0)}}
+#card .tagrow{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+#card .tagrow span{font-size:11px;background:#ff8a3d;color:#fff;border-radius:999px;padding:2px 8px}
+#card .tagrow button{font:inherit;font-size:12px;color:#fff;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:3px 10px}
+
 #toast{position:absolute;left:50%;top:40%;transform:translateX(-50%);padding:8px 14px;font-size:13px;display:none}
 </style>
 </head>
@@ -67,13 +146,24 @@ html,body{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;m
   <div id="toast" class="glass"></div>
   <div id="warn" class="glass"></div>
   <button id="bEye">目線 1.5m</button>
+  <button id="bTrain">🚃 自動</button>
   <button id="bSnd" style="position:absolute;right:10px;top:max(10px,env(safe-area-inset-top));font-size:18px;background:rgba(10,14,28,.6);border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:6px 10px;color:#fff;z-index:4">🔊</button>
   <div class="btns" id="btns"><button id="bTts">読み上げ ON</button><button id="bPause">一時停止</button><button id="bBack">戻る</button></div>
   <div id="card" class="glass"></div>
+  <button id="bDex">📖<span class="n" id="dexN">0</span></button>
+  <div id="got"><div class="bx"><div class="ring" id="gotIc">📍</div><div class="t1" id="gotT1">GET!</div><div class="t2" id="gotT2"></div></div></div>
+  <div id="dex"><div class="book">
+    <div class="pages"><div class="dx-head"><div class="dx-lv"><small>Lv</small><b id="dxLv">1</b></div><div class="dx-xp"><div class="t" id="dxTitle">スポット図鑑</div><div class="bar"><i id="dxBar" style="width:0"></i></div></div><button class="dx-x" id="dxClose">✕</button></div>
+      <div id="dxNav"><div class="dx-tabs" id="dxTabs"></div><div class="dx-tags" id="dxTagF"></div></div>
+      <div id="dexPage"></div></div>
+    <div class="cover"><div class="front"><div class="emb">🧭</div><h1>スポット図鑑</h1><p id="dxCoverSub">見つけた景色の記録</p></div><div class="back"></div></div>
+  </div></div>
+  <div id="tagSheet"><div class="sh"><h3 id="tsTitle">タグ</h3><div class="chips" id="tsChips"></div><div class="row"><input id="tsIn" placeholder="新しいタグ" maxlength="16"><button id="tsAdd">追加</button></div><button class="ok" id="tsOk">完了</button></div></div>
+
   <div id="intro">
     <h1>Sling Spot AR（仮称）</h1>
     <p>景色の気になる場所を<b>長押し</b>でロック → <b>パチンコのように引いて離す</b>と、その場所へ飛んで360°回りながら解説します。</p>
-    <p style="font-size:12px;opacity:.75">手前の建物や山に遮られて見えないスポットは選ばれません。高層階では右上の「目線」で高さを設定してください。<br>候補が違うときは、引かずに指を離すと候補が出ます。正しい候補を選ぶと方位のズレが自動補正されます。</p>
+    <p style="font-size:12px;opacity:.75">🚃 電車・車で移動中は自動で「車窓モード」になります（右上で右窓／左窓を指定可）。<br>手前の建物や山に遮られて見えないスポットは選ばれません。高層階では右上の「目線」で高さを設定してください。<br>候補が違うときは、引かずに指を離すと候補が出ます。正しい候補を選ぶと方位のズレが自動補正されます。</p>
     <p style="font-size:12px;opacity:.75">🔊 効果音と解説の読み上げがあります。音が出ない場合は消音設定と音量を確認してください。</p>
     <p class="warn">⚠ 歩行中・運転中は使用しないでください。周囲の安全を確認して使用してください。</p>
     <p style="font-size:11px;opacity:.65">カメラ映像は端末外へ送信されません。周辺スポット検索のため、現在地の座標がWikipedia・Wikidataへ送信されます（保存はしません）。解説はWikipedia記事の抜粋で、正確性は保証されません。</p>
@@ -155,7 +245,7 @@ const FALLBACK=[
 ];
 const D=Math.PI/180;
 const $=id=>document.getElementById(id);
-const S={state:'idle',heading:0,pitch:0,pos:{...CFG.defaultPos},demo:false,sensor:false,gotAbs:false,spots:FALLBACK.slice(),cand:[],sel:null,anchor:null,pull:0,cards:[],tts:true,paused:false,cardIdx:-1,lastFetch:null,debug:{},M:null,sensorOff:0,userOff:0,calibN:0,gotWeb:false,forceAngle:null,eyeH:1.5,compAcc:null,inside:null,visReady:false};
+const S={state:'idle',heading:0,pitch:0,pos:{...CFG.defaultPos},demo:false,sensor:false,gotAbs:false,spots:FALLBACK.slice(),cand:[],sel:null,anchor:null,pull:0,cards:[],tts:true,paused:false,cardIdx:-1,lastFetch:null,debug:{},M:null,sensorOff:0,userOff:0,calibN:0,gotWeb:false,forceAngle:null,eyeH:1.5,compAcc:null,moving:false,trainPref:'auto',side:null,trainC:null,hGyro:null,Mg:null,hAbsRaw:0,fetchCtr:null,fetching:0,inside:null,visReady:false};
 window.__S=S;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const angDiff=(a,b)=>((((a-b+540)%360)+360)%360)-180;
@@ -174,7 +264,7 @@ function onOri(e){
   if(S.demo||e.beta==null)return;
   const web=typeof e.webkitCompassHeading==='number'&&!isNaN(e.webkitCompassHeading);
   if(e.type==='deviceorientationabsolute')S.gotAbs=true;
-  if(e.type==='deviceorientation'&&S.gotAbs)return;
+  const relOnly=e.type==='deviceorientation'&&S.gotAbs;
   const absolute=e.type==='deviceorientationabsolute'||(e.absolute===true&&!web);
   const a=(e.alpha||0)*D,b=e.beta*D,g=(e.gamma||0)*D;
   const cA=Math.cos(a),sA=Math.sin(a),cB=Math.cos(b),sB=Math.sin(b),cG=Math.cos(g),sG=Math.sin(g);
@@ -182,9 +272,10 @@ function onOri(e){
   const X=[cA*cG-sA*sB*sG, cG*sA+cA*sB*sG, -cB*sG];
   const Y=[-cB*sA, cA*cB, sB];
   const Z=[cA*sG+cG*sA*sB, sA*sG-cA*cG*sB, cB*cG];
-  S.M={X,Y,Z};
   const hRel=norm(Math.atan2(-Z[0],-Z[1])/D);
   const p=Math.asin(clamp(-Z[2],-1,1))/D;
+  if(relOnly){S.Mg={X,Y,Z};S.hGyro=hRel;updHeading();return}
+  S.M={X,Y,Z}; S.hAbsRaw=hRel; if(!S.gotAbs){S.Mg=S.M;S.hGyro=hRel}
   if(web&&!absolute){
     S.gotWeb=true; if(typeof e.webkitCompassAccuracy==='number')S.compAcc=e.webkitCompassAccuracy;
     if(Math.abs(p)<60){ // カメラがほぼ水平のときだけiOSコンパスで補正値を学習
@@ -192,10 +283,10 @@ function onOri(e){
       S.sensorOff=S.calibN?norm(S.sensorOff+0.15*angDiff(off,S.sensorOff)):norm(off); S.calibN++;
     }
   }else if(absolute){S.sensorOff=0}
-  S.sensor=true;
-  S.heading=norm(hRel+S.sensorOff+S.userOff);
-  S.pitch=p;
+  S.sensor=true; S.pitch=p; updHeading();
 }
+function trainActive(){return S.moving&&S.trainC!=null&&S.hGyro!=null&&S.Mg}
+function updHeading(){ S.heading=trainActive()?norm(S.hGyro+S.trainC+S.userOff):norm(S.hAbsRaw+S.sensorOff+S.userOff); }
 async function startSensors(){
   try{ if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){ const r=await DeviceOrientationEvent.requestPermission(); if(r!=='granted')throw 0; } }catch(e){}
   window.addEventListener('deviceorientationabsolute',onOri,true);
@@ -210,15 +301,60 @@ async function startCamera(){
 }
 function startGeo(){
   if(!navigator.geolocation){return}
-  navigator.geolocation.watchPosition(p=>{
-    const np={lat:p.coords.latitude,lon:p.coords.longitude,acc:p.coords.accuracy,alt:p.coords.altitude};
-    const moved=dist(S.pos.lat,S.pos.lon,np.lat,np.lon);
-    S.pos=np; if(moved>300||!S.lastFetch)refreshSpots();
-  },()=>{},{enableHighAccuracy:true,maximumAge:5000});
+  navigator.geolocation.watchPosition(p=>onFix(p.coords,p.timestamp||Date.now()),()=>{},{enableHighAccuracy:true,maximumAge:0});
 }
+// ---------- 車窓モード（移動中） ----------
+function onFix(c,ts){
+  const prev=S.pos, np={lat:c.latitude,lon:c.longitude,acc:c.accuracy,alt:c.altitude,ts,speed:c.speed,course:c.heading};
+  if(prev&&prev.ts&&ts>prev.ts){
+    const dm=dist(prev.lat,prev.lon,np.lat,np.lon),dt=(ts-prev.ts)/1000;
+    if(!(np.speed>=0))np.speed=dm/dt;
+    if(!(np.course>=0)&&dm>15)np.course=bearing(prev.lat,prev.lon,np.lat,np.lon);
+  }
+  if(!(np.course>=0)&&prev&&prev.course>=0&&np.speed>2)np.course=prev.course;
+  S.pos=np; const v=np.speed||0;
+  if(S.trainPref!=='off'){
+    if(v>4){S.fastSince=S.fastSince||ts;S.slowSince=null}else if(v<1.5){S.slowSince=S.slowSince||ts;S.fastSince=null}
+    if(!S.moving&&(S.trainPref!=='auto'||(S.fastSince&&ts-S.fastSince>5000)))enterMoving();
+    if(S.moving&&S.trainPref==='auto'&&S.slowSince&&ts-S.slowSince>20000)exitMoving();
+  }
+  if(S.moving&&np.course>=0&&v>3)trainCalib(np.course);
+  const th=S.moving?1500:300;
+  if(!S.fetchCtr||dist(S.fetchCtr.lat,S.fetchCtr.lon,np.lat,np.lon)>th)refreshSpots();
+}
+window.__onFix=onFix;
+function enterMoving(){
+  S.moving=true; S.userOff=0; S.trainC=null; S.side=S.trainPref==='right'?1:S.trainPref==='left'?-1:null;
+  toast('車窓モード：GPSの進行方向から方位を推定します'); S.fetchCtr=null;
+}
+function exitMoving(){ S.moving=false; S.trainC=null; S.userOff=0; updHeading(); toast('車窓モードを終了しました'); }
+function trainCalib(course){
+  if(S.hGyro==null)return;
+  if(S.side==null){ // 窓の左右を磁気コンパスの向きから推定（後でボタンで切替可）
+    const hm=norm(S.hAbsRaw+S.sensorOff); S.side=Math.abs(angDiff(hm,course+90))<=Math.abs(angDiff(hm,course-90))?1:-1;
+  }
+  const target=norm(course+90*S.side);
+  if(S.trainC==null){ if(Math.abs(S.pitch)<35)S.trainC=norm(target-S.hGyro); } // カメラが水平に近いときに初期合わせ
+  else{ const d=angDiff(target,norm(S.hGyro+S.trainC)); if(Math.abs(d)<35)S.trainC=norm(S.trainC+0.05*d); } // ジャイロのドリフトをゆっくり補正
+  updHeading();
+}
+function posNow(){ // 位置の遅れを速度×経過時間で補正
+  const p=S.pos; if(!S.moving||!(p.speed>1)||!(p.course>=0)||!p.ts)return p;
+  const d=p.speed*Math.min(5,(Date.now()-p.ts)/1000);
+  return {...p,lat:p.lat+d*Math.cos(p.course*D)/111320,lon:p.lon+d*Math.sin(p.course*D)/(111320*Math.cos(p.lat*D))};
+}
+function aheadCenter(){ const p=posNow(); if(!S.moving||!(p.course>=0))return p; const d=1000;
+  return {lat:p.lat+d*Math.cos(p.course*D)/111320,lon:p.lon+d*Math.sin(p.course*D)/(111320*Math.cos(p.lat*D))}; }
+$('bTrain').onclick=()=>{
+  const L=['auto','right','left','off'],N={auto:'🚃 自動',right:'🚃 右窓',left:'🚃 左窓',off:'🚃 OFF'};
+  S.trainPref=L[(L.indexOf(S.trainPref)+1)%L.length]; $('bTrain').textContent=N[S.trainPref];
+  if(S.trainPref==='off'){ if(S.moving)exitMoving(); }
+  else if(S.trainPref!=='auto'){ if(!S.moving)enterMoving(); S.side=S.trainPref==='right'?1:-1; S.trainC=null; }
+};
 async function refreshSpots(){
-  S.lastFetch=Date.now();
-  const {lat,lon}=S.pos;
+  if(S.fetching&&Date.now()-S.fetching<20000)return; S.fetching=Date.now();
+  S.lastFetch=Date.now(); S.fetchCtr={lat:S.pos.lat,lon:S.pos.lon};
+  const C=aheadCenter(), lat=C.lat, lon=C.lon;
   const wp=fetch(`https://ja.wikipedia.org/w/api.php?action=query&list=geosearch&gscoord=${lat}|${lon}&gsradius=${CFG.poiRadius}&gslimit=200&format=json&origin=*`).then(r=>r.json()).then(j=>(j.query.geosearch||[]).map(g=>({name:g.title,title:g.title,lat:g.lat,lon:g.lon,r:120,h:40})));
   const q=`SELECT ?item ?itemLabel ?lat ?lon ?elev ?title WHERE {
  SERVICE wikibase:around { ?item wdt:P625 ?c. bd:serviceParam wikibase:center "Point(${lon} ${lat})"^^geo:wktLiteral. bd:serviceParam wikibase:radius "${CFG.mtRadiusKm}". }
@@ -235,7 +371,7 @@ async function refreshSpots(){
   const seen=new Set(), out=[];
   for(const s of mts.concat(FALLBACK,pois)){ if(!seen.has(s.name)){seen.add(s.name);out.push(s)} }
   S.spots=out;
-  loadEnv().then(computeVis).catch(e=>{S.debug.envErr=String(e)});
+  loadEnv(C).then(()=>{ if(S.moving)S.visReady=true; else computeVis(); }).catch(e=>{S.debug.envErr=String(e)}).finally(()=>{S.fetching=0});
 }
 function enterDemo(msg){
   S.demo=true;
@@ -265,16 +401,16 @@ function elevAt(lat,lon){ // 読込済みタイルから標高(m)。近距離用
   }
   return null;
 }
-async function loadEnv(){
-  const {lat,lon}=S.pos, jobs=[];
+async function loadEnv(C){
+  C=C||S.pos; const lat=C.lat, lon=C.lon, jobs=[];
   for(const [z,rad] of [[13,3000],[10,CFG.mtRadiusKm*1000]]){
     const dLat=rad/111320,dLon=rad/(111320*Math.cos(lat*D)),a=tileXY(lat+dLat,lon-dLon,z),b=tileXY(lat-dLat,lon+dLon,z);
     for(let x=Math.floor(a.x);x<=Math.floor(b.x);x++)for(let y=Math.floor(a.y);y<=Math.floor(b.y);y++)jobs.push(loadTile(z,x,y));
   }
-  const q=`[out:json][timeout:20];way["building"](around:${CFG.bldgRadius},${lat},${lon});out tags geom;`;
+  const q=`[out:json][timeout:20];way["building"](around:${S.moving?1000:CFG.bldgRadius},${lat},${lon});out tags geom;`;
   const bj=fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)).then(r=>r.json()).catch(()=>null);
   await Promise.all(jobs); const j=await bj;
-  S.bldgs=[]; if(j&&j.elements){
+  S.bldgs=[]; S.bOrigin={lat,lon}; if(j&&j.elements){
     const k=111320*Math.cos(lat*D);
     for(const w of j.elements){ if(!w.geometry||w.geometry.length<3)continue; const t=w.tags||{};
       let h=parseFloat(t.height); if(!(h>0))h=(parseFloat(t['building:levels'])||0)*3.2; if(!(h>0))h=10;
@@ -291,30 +427,31 @@ function segHit(px,py,qx,qy,pts){ // 原点→(qx,qy)の線分と多角形の最
     const t=((ax-px)*sy-(ay-py)*sx)/den,u=((ax-px)*ry-(ay-py)*rx)/den; if(t>0&&t<=1&&u>=0&&u<=1&&(best==null||t<best))best=t;
   } return best;
 }
-function computeVis(){
-  const {lat,lon}=S.pos, k=111320*Math.cos(lat*D), R=6371000;
-  const g0=elevAt(lat,lon); S.ground=g0; const eye=(g0!=null?g0:0)+S.eyeH;
-  S.inside=null; for(const b of S.bldgs||[]){ if(pip(0,0,b.pts)){S.inside=b;break} }
-  for(const b of S.bldgs||[]){ if(b.g==null){const la=lat+b.cy/111320,lo=lon+b.cx/k;b.g=elevAt(la,lo)} }
-  const ang=(dz,d)=>Math.atan2(dz-0.87*d*d/(2*R),d);
-  let nv=0;
-  for(const sp of S.spots){
-    const d=dist(lat,lon,sp.lat,sp.lon); if(d<30){sp.vis=true;continue}
-    const gT=elevAt(sp.lat,sp.lon), top=sp.kind==='mt'?sp.h:((gT!=null?gT:0)+(sp.h||40));
-    const aT=ang(top-eye,d), edge=Math.max(sp.kind==='mt'?Math.min(sp.r,d*.08):(sp.r||120),d*.03);
-    let blocked=null;
-    // 地形: 視線上を標本化し、手前の地形がターゲット頂部より高く見えるか
-    const n=Math.min(160,Math.max(24,Math.round(d/60)));
-    for(let i=1;i<n;i++){ const s=d*i/n; if(s>d-edge)break;
-      const la=lat+(sp.lat-lat)*i/n, lo=lon+(sp.lon-lon)*i/n, e=elevAt(la,lo); if(e==null)continue;
-      if(ang(e-eye,s)>aT+0.15*D){blocked='地形';break} }
-    // 建物: 手前の建物（自分のいる建物は除く）
-    if(!blocked&&S.bldgs){ const qx=(sp.lon-lon)*k,qy=(sp.lat-lat)*111320;
-      for(const b of S.bldgs){ if(b===S.inside)continue; if(Math.hypot(b.cx,b.cy)>d)continue;
-        const t=segHit(0,0,qx,qy,b.pts); if(t==null)continue; const s=t*d; if(s>d-edge)continue;
-        if(ang((b.g!=null?b.g:(g0||0))+b.h-eye,s)>aT){blocked='建物'+(b.name?'（'+b.name+'）':'');break} } }
-    sp.vis=!blocked; sp.block=blocked; if(sp.vis)nv++;
+function visOne(sp,P,eye,g0,ignore){
+  const R=6371000, k=111320*Math.cos(P.lat*D), ang=(dz,d)=>Math.atan2(dz-0.87*d*d/(2*R),d);
+  const d=dist(P.lat,P.lon,sp.lat,sp.lon); if(d<30)return null;
+  const gT=elevAt(sp.lat,sp.lon), top=sp.kind==='mt'?sp.h:((gT!=null?gT:0)+(sp.h||40));
+  const aT=ang(top-eye,d), edge=Math.max(sp.kind==='mt'?Math.min(sp.r,d*.08):(sp.r||120),d*.03);
+  const n=Math.min(160,Math.max(24,Math.round(d/60)));
+  for(let i=1;i<n;i++){ const s2=d*i/n; if(s2>d-edge)break;
+    const e=elevAt(P.lat+(sp.lat-P.lat)*i/n,P.lon+(sp.lon-P.lon)*i/n); if(e==null)continue;
+    if(ang(e-eye,s2)>aT+0.15*D)return '地形'; }
+  if(S.bldgs&&S.bOrigin){
+    const ko=111320*Math.cos(S.bOrigin.lat*D), ox=(P.lon-S.bOrigin.lon)*ko, oy=(P.lat-S.bOrigin.lat)*111320;
+    const qx=(sp.lon-S.bOrigin.lon)*ko, qy=(sp.lat-S.bOrigin.lat)*111320;
+    for(const b of S.bldgs){ if(b===ignore)continue; if(Math.hypot(b.cx-ox,b.cy-oy)>d)continue;
+      const t=segHit(ox,oy,qx,qy,b.pts); if(t==null)continue; const s2=t*d; if(s2>d-edge)continue;
+      if(ang((b.g!=null?b.g:(g0||0))+b.h-eye,s2)>aT)return '建物'+(b.name?'（'+b.name+'）':''); }
   }
+  return null;
+}
+function eyeAt(P){ const g0=elevAt(P.lat,P.lon); return {g0,eye:(g0!=null?g0:0)+S.eyeH}; }
+function computeVis(){
+  const P=S.pos, {g0,eye}=eyeAt(P); S.ground=g0;
+  const ko=S.bOrigin?111320*Math.cos(S.bOrigin.lat*D):0, ox=S.bOrigin?(P.lon-S.bOrigin.lon)*ko:0, oy=S.bOrigin?(P.lat-S.bOrigin.lat)*111320:0;
+  S.inside=null; if(!S.moving)for(const b of S.bldgs||[]){ if(pip(ox,oy,b.pts)){S.inside=b;break} }
+  for(const b of S.bldgs||[]){ if(b.g==null&&S.bOrigin){b.g=elevAt(S.bOrigin.lat+b.cy/111320,S.bOrigin.lon+b.cx/ko)} }
+  let nv=0; for(const sp of S.spots){ sp.block=visOne(sp,P,eye,g0,S.inside); sp.vis=!sp.block; if(sp.vis)nv++; }
   S.visReady=true; S.debug.vis={n:S.spots.length,visible:nv,eye:Math.round(eye),inside:!!S.inside};
 }
 window.__vis={computeVis,elevAt,DEM};
@@ -324,10 +461,11 @@ function envWarn(){
   if(S.demo)return '';
   const w=[];
   if(!S.pos.acc)w.push('現在地を取得中…');
-  else if(S.pos.acc>50)w.push(`位置の精度が低い（±${Math.round(S.pos.acc)}m）。屋内の可能性`);
-  if(S.inside)w.push('建物の中にいるようです。窓から見える方向を狙ってください');
-  if(S.compAcc!=null&&(S.compAcc<0||S.compAcc>20))w.push(`方位が不安定（±${Math.round(S.compAcc)}°）。8の字に振って補正`);
-  if(w.length&&(S.pos.acc>50||S.inside))w.push('屋外・窓際での使用をおすすめします');
+  else if(S.pos.acc>50)w.push(`位置の精度が低い（±${Math.round(S.pos.acc)}m）${S.moving?'':'。屋内の可能性'}`);
+  if(S.moving&&S.trainC==null)w.push('車窓モード：カメラを窓の外へ真横に向けてください（方位合わせ中）');
+  if(S.inside&&!S.moving)w.push('建物の中にいるようです。窓から見える方向を狙ってください');
+  if(!S.moving&&S.compAcc!=null&&(S.compAcc<0||S.compAcc>20))w.push(`方位が不安定（±${Math.round(S.compAcc)}°）。8の字に振って補正`);
+  if(!S.moving&&(S.pos.acc>50||S.inside))w.push('屋外・窓際での使用をおすすめします');
   return w.join(' ／ ');
 }
 // ---------- spot resolver ----------
@@ -340,21 +478,21 @@ function rayAt(x,y){
   const v=$('cam'); let fp;
   if(v.videoWidth){const sc=Math.max(W/v.videoWidth,H/v.videoHeight);fp=sc*(Math.max(v.videoWidth,v.videoHeight)/2)/Math.tan(CFG.camFovLong/2*D)}
   else fp=(Math.max(W,H)/2)/Math.tan(CFG.camFovLong/2*D);
-  const th=scrAngle()*D,c=Math.cos(th),sn=Math.sin(th),{X,Y,Z}=S.M;
+  const mv=trainActive(),th=scrAngle()*D,c=Math.cos(th),sn=Math.sin(th),{X,Y,Z}=mv?S.Mg:S.M;
   const u=(x-W/2)/fp,w=(H/2-y)/fp;
   const d=[0,1,2].map(i=>-Z[i]+u*(X[i]*c-Y[i]*sn)+w*(X[i]*sn+Y[i]*c));
-  return {az:norm(Math.atan2(d[0],d[1])/D+S.sensorOff+S.userOff),el:Math.asin(d[2]/Math.hypot(d[0],d[1],d[2]))/D};
+  return {az:norm(Math.atan2(d[0],d[1])/D+(mv?S.trainC-0:S.sensorOff)+S.userOff),el:Math.asin(d[2]/Math.hypot(d[0],d[1],d[2]))/D};
 }
 function resolve(x,y){
   const {az,el}=rayAt(x,y);
-  const myAlt=(S.pos.alt!=null?S.pos.alt:30), out=[];
+  const P=posNow(), myAlt=(S.ground!=null?S.ground+S.eyeH:(S.pos.alt!=null?S.pos.alt:30)), out=[], EV=(S.moving&&S.visReady)?eyeAt(P):null;
   let hidden=0;
   for(const s of S.spots){
-    const d=dist(S.pos.lat,S.pos.lon,s.lat,s.lon); if(d<30)continue;
-    const b=bearing(S.pos.lat,S.pos.lon,s.lat,s.lon);
+    const d=dist(P.lat,P.lon,s.lat,s.lon); if(d<30)continue;
+    const b=bearing(P.lat,P.lon,s.lat,s.lon);
     const tol=clamp(Math.atan((s.r||120)/d)/D,1.0,8);
     const ad=Math.abs(angDiff(b,az)); if(ad>tol*1.5+1)continue;
-    if(!S.demo&&S.visReady&&s.vis===false){hidden++;continue}
+    if(!S.demo&&S.visReady){ const bl=EV?visOne(s,P,EV.eye,EV.g0,null):(s.vis===false?s.block:null); if(bl){hidden++;continue} }
     let score=ad/tol;
     if(s.kind==='mt'){
       const elS=Math.atan2(s.h-myAlt-0.87*d*d/(2*6371000),d)/D; // 地球曲率・大気差を簡易補正
@@ -387,7 +525,7 @@ ov.addEventListener('pointerdown',e=>{
 });
 ov.addEventListener('pointermove',e=>{
   if(!down)return;
-  if(S.state==='idle'&&Math.hypot(e.clientX-down.x,e.clientY-down.y)>CFG.lockMove){clearTimeout(timer);down=null;return}
+  if(S.state==='idle'&&Math.hypot(e.clientX-down.x,e.clientY-down.y)>(S.moving?28:CFG.lockMove)){clearTimeout(timer);down=null;return}
   if(S.state==='locked'||S.state==='pulling'){
     S.fx=clamp(e.clientX,8,innerWidth-8); S.fy=clamp(e.clientY,8,innerHeight-8); S.pull=clamp(Math.hypot(S.fx-S.anchor.x,S.fy-S.anchor.y)*S.gain,0,CFG.pullMax);
     const was=S.state; S.state='pulling'; S.finger={x:e.clientX,y:e.clientY};
@@ -523,6 +661,9 @@ const SFX={
   cancel(){tone({f:520,f2:260,dur:.15,vol:.08})},
   release(k){tone({f:380+300*k,f2:90,type:'triangle',dur:.32,vol:.28});noiseSweep(3000,600,.12,.12)},
   whoosh(d){noiseSweep(350,2600,d,.16)},
+  got(){[1046.5,1318.5,1568,2093].forEach((f,i)=>tone({f,dur:.25,vol:.12,at:i*.09,type:'triangle'}))},
+  book(){noiseSweep(900,300,.45,.12)},
+  page(){noiseSweep(2500,900,.22,.09)},
   arrive(){tone({f:1046.5,dur:.9,vol:.12});tone({f:1568,dur:1.1,vol:.09,at:.12});tone({f:2093,dur:1.2,vol:.05,at:.24})}
 };
 // ---------- voice (日本語読み上げ) ----------
@@ -560,24 +701,150 @@ function buildCards(ex){
   return cards;
 }
 async function explain(sp){
-  const title=sp.title||sp.name; let ex='',url='';
+  const title=sp.title||sp.name; let ex='',url='',thumb='';
   try{
-    const r=await fetch(`https://ja.wikipedia.org/w/api.php?action=query&prop=extracts|info&inprop=url&explaintext=1&redirects=1&titles=${encodeURIComponent(title)}&format=json&origin=*`);
+    const r=await fetch(`https://ja.wikipedia.org/w/api.php?action=query&prop=extracts|info|pageimages&piprop=thumbnail&pithumbsize=480&inprop=url&explaintext=1&redirects=1&titles=${encodeURIComponent(title)}&format=json&origin=*`);
     const j=await r.json(); const pg=Object.values((j.query&&j.query.pages)||{})[0]||{};
-    ex=pg.extract||''; url=pg.fullurl||'';
+    ex=pg.extract||''; url=pg.fullurl||''; thumb=(pg.thumbnail&&pg.thumbnail.source)||'';
   }catch(e){}
   if(CFG.llmEndpoint){
     try{
       const r=await fetch(CFG.llmEndpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:sp.name,lat:sp.lat,lon:sp.lon,extract:ex.slice(0,6000),source:url})});
       const j=await r.json();
-      return {src:url,cards:[{h:'概要',t:j.summary},{h:'歴史',t:j.history},{h:'見どころ',t:(j.highlights||[]).join(' ／ ')},{h:'おすすめ',t:j.recommend}].filter(c=>c.t)};
+      return {src:url,thumb,intro:ex.split('\n')[0]||'',cards:[{h:'概要',t:j.summary},{h:'歴史',t:j.history},{h:'見どころ',t:(j.highlights||[]).join(' ／ ')},{h:'おすすめ',t:j.recommend}].filter(c=>c.t)};
     }catch(e){}
   }
-  const cards=ex?buildCards(ex):[];
-  if(!cards.length)return {src:url,cards:[{h:'解説',t:'このスポットの解説を取得できませんでした（オフライン、または記事なし）。'}]};
-  return {src:url,cards};
+  const cards=ex?buildCards(ex):[], intro=ex.split('\n')[0]||'';
+  if(!cards.length)return {src:url,thumb,intro,cards:[{h:'解説',t:'このスポットの解説を取得できませんでした（オフライン、または記事なし）。'}]};
+  return {src:url,thumb,intro,cards};
 }
 window.__buildCards=buildCards;
+
+// ---------- スポット図鑑（コレクション） ----------
+const GENRES=[
+ {id:'mt',n:'山・自然',ic:'⛰️',c:'#3aa35b',re:/山|岳|峰|火山|連峰|高原|丘/},
+ {id:'castle',n:'城・史跡',ic:'🏯',c:'#b0563a',re:/城|史跡|遺跡|古墳|陣屋|館跡|霊屋|霊廟|廟$/},
+ {id:'shrine',n:'神社',ic:'⛩️',c:'#e2483d',re:/神社|大社|神宮|八幡|稲荷|天満宮/},
+ {id:'street',n:'街・通り',ic:'🛣️',c:'#e07b39',re:/通$|通り$|街道$|商店街|横丁|大通|Street|Road/i},
+ {id:'temple',n:'寺院',ic:'🛕',c:'#a77b2e',re:/寺|観音|大仏|院$|堂$/},
+ {id:'tower',n:'タワー・ビル',ic:'🏙️',c:'#4b6bd6',re:/タワー|塔|ビル|ヒルズ|ホテル|プレイス|スクエア|Tower|Building|Hotel/i},
+ {id:'station',n:'駅・交通',ic:'🚉',c:'#1b8fbf',re:/駅|空港|港$|インターチェンジ|ターミナル|Station|Airport/i},
+ {id:'bridge',n:'橋・土木',ic:'🌉',c:'#6b7b8c',re:/橋|ダム|トンネル|堤|Bridge/i},
+ {id:'park',n:'公園・庭園',ic:'🌳',c:'#41b06e',re:/公園|庭園|植物園|動物園|緑地|Park|Garden/i},
+ {id:'museum',n:'博物館・美術館',ic:'🏛️',c:'#8a59c9',re:/博物館|美術館|資料館|記念館|ミュージアム|Museum|Gallery/i},
+ {id:'school',n:'学校・大学',ic:'🎓',c:'#d18b1f',re:/大学|学校|学院|高等|中学|University|School/i},
+ {id:'water',n:'川・湖・海',ic:'🌊',c:'#2a9fd6',re:/川|湖|沼|海|湾|滝|浜|River|Lake|Bay/i},
+ {id:'other',n:'その他',ic:'📍',c:'#7c8b90',re:/$^/}
+];
+const GMAP=Object.fromEntries(GENRES.map(g=>[g.id,g]));
+function genreOf(sp,intro){
+  if(sp.kind==='mt')return 'mt';
+  const nm=sp.name||'', s1=(intro||'').split('。')[0];
+  for(const g of GENRES){ if(g.id!=='other'&&g.re.test(nm))return g.id; }
+  const tail=s1.replace(/(宮城|茨城|岩城|城下|城県|城市|城町|城区)/g,'').slice(-24); // 「〜は、…にある神社である」の述部で判定（地名の「城」を除外）
+  for(const g of GENRES){ if(g.id!=='other'&&g.re.test(tail))return g.id; }
+  return 'other';
+}
+const DEX={k:'slingdex.v1',d:null};
+function dexLoad(){
+  if(DEX.d)return DEX.d;
+  try{DEX.d=JSON.parse(localStorage.getItem(DEX.k))}catch(e){}
+  if(!DEX.d||!DEX.d.items)DEX.d={items:{},seq:0,tags:['行きたい','行った','絶景','歴史','撮影スポット','車窓','グルメ']};
+  return DEX.d;
+}
+function dexSave(){ try{localStorage.setItem(DEX.k,JSON.stringify(DEX.d))}catch(e){} dexBadge(); }
+function dexBadge(){ const n=Object.keys(dexLoad().items).length; $('dexN').textContent=n; $('dexN').style.display=n?'block':'none'; }
+function dexRecord(sp,res){
+  const d=dexLoad(), id=sp.title||sp.name; let it=d.items[id]; const isNew=!it;
+  if(!it){ it=d.items[id]={id,no:++d.seq,name:sp.name,lat:sp.lat,lon:sp.lon,kind:sp.kind||'',h:sp.h,r:sp.r,title:sp.title||'',genre:genreOf(sp,res.intro),tags:[],first:Date.now(),count:0};
+    if(S.moving)it.tags.push('車窓'); }
+  it.count++; it.last=Date.now(); it.dist=Math.round(sp.d||0); it.url=res.src||it.url||''; if(res.thumb)it.thumb=res.thumb;
+  if(res.cards&&res.cards[0])it.summary=res.cards[0].t;
+  dexSave(); return {it,isNew};
+}
+function lvOf(n){ const lv=Math.floor(n/3)+1; return {lv,frac:(n%3)/3}; }
+function showGot(it,isNew){
+  const g=GMAP[it.genre]; $('gotIc').textContent=g.ic; $('gotIc').style.background=`radial-gradient(circle at 35% 30%,#fff8,${g.c} 60%)`;
+  $('gotT1').textContent=isNew?'NEW! 図鑑に登録':'記録を更新'; $('gotT2').textContent=`No.${String(it.no).padStart(3,'0')} ${it.name} ／ ${g.n}${isNew?'':' ／ '+it.count+'回目'}`;
+  const el=$('got'); el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+  if(isNew)SFX.got(); setTimeout(()=>el.classList.remove('show'),2300);
+}
+// --- 図鑑UI ---
+const DV={genre:'all',tag:null,detail:null};
+function openDex(){
+  dexLoad(); const el=$('dex'); el.classList.add('show'); el.classList.remove('open');
+  const n=Object.keys(DEX.d.items).length; $('dxCoverSub').textContent=`登録 ${n} 件`;
+  renderHead(); renderNav(); DV.detail=null; $('dexPage').innerHTML=listHTML();
+  layoutPage(); bindPage(); SFX.book();
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('open')));
+}
+function closeDex(){ const el=$('dex'); el.classList.remove('open'); SFX.book(); setTimeout(()=>el.classList.remove('show'),900); }
+function layoutPage(){ $('dxNav').style.display=DV.detail?'none':'block'; const h=document.querySelector('.dx-head').offsetHeight+(DV.detail?0:$('dxNav').offsetHeight); $('dexPage').style.top=h+'px'; }
+function renderHead(){
+  const its=Object.values(DEX.d.items), n=its.length, L=lvOf(n), gs=new Set(its.map(i=>i.genre)).size;
+  $('dxLv').textContent=L.lv; $('dxBar').style.width=(L.frac*100)+'%'; $('dxTitle').textContent=`スポット図鑑  ${n}件 ／ ${gs}ジャンル`;
+}
+function renderNav(){
+  const its=Object.values(DEX.d.items), cnt=g=>its.filter(i=>i.genre===g).length;
+  $('dxTabs').innerHTML=`<button data-g="all" class="${DV.genre==='all'?'on':''}">すべて ${its.length}</button>`+GENRES.filter(g=>cnt(g.id)).map(g=>`<button data-g="${g.id}" class="${DV.genre===g.id?'on':''}">${g.ic} ${g.n} ${cnt(g.id)}</button>`).join('');
+  const tags=[...new Set(its.flatMap(i=>i.tags))];
+  $('dxTagF').innerHTML=tags.length?tags.map(t=>`<button data-t="${esc(t)}" class="${DV.tag===t?'on':''}">🏷 ${esc(t)}</button>`).join(''):'';
+  $('dxTagF').style.display=tags.length?'flex':'none';
+  $('dxTabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{const order=['all',...GENRES.map(g=>g.id)];const dir=order.indexOf(b.dataset.g)<order.indexOf(DV.genre)?-1:1;DV.genre=b.dataset.g;renderNav();flipTo(listHTML(),dir)});
+  $('dxTagF').querySelectorAll('button').forEach(b=>b.onclick=()=>{DV.tag=DV.tag===b.dataset.t?null:b.dataset.t;renderNav();flipTo(listHTML(),1)});
+}
+function medal(n){ return n>=10?'🥇 ゴールド':n>=5?'🥈 シルバー':n>=1?'🥉 ブロンズ':''; }
+function listHTML(){
+  const its=Object.values(DEX.d.items).filter(i=>(DV.genre==='all'||i.genre===DV.genre)&&(!DV.tag||i.tags.includes(DV.tag))).sort((a,b)=>a.no-b.no);
+  if(!Object.keys(DEX.d.items).length)return `<div class="dx-empty">まだ記録がありません。<br>景色の気になる場所をパチンコで狙って飛ぶと、ここに登録されます。</div>`;
+  if(!its.length)return `<div class="dx-empty">該当する記録がありません。</div>`;
+  const g=GMAP[DV.genre], head=DV.genre==='all'?`<div class="dx-sec"><span>すべての記録</span><span class="dx-medal">${GENRES.filter(x=>Object.values(DEX.d.items).some(i=>i.genre===x.id)).map(x=>x.ic).join('')}</span></div>`
+    :`<div class="dx-sec"><span>${g.ic} ${g.n}</span><span class="dx-medal">${medal(its.length)}${its.length<10?` ／ 次まで ${its.length<1?1:its.length<5?5-its.length:10-its.length}件`:''}</span></div>`;
+  return head+`<div class="dx-grid">`+its.map(i=>{const gg=GMAP[i.genre];return `<button class="dx-card" data-id="${esc(i.id)}" style="--gc:${gg.c}"><span class="no">No.${String(i.no).padStart(3,'0')}</span><div class="ph" style="${i.thumb?`background-image:url('${esc(i.thumb)}')`:''}">${i.thumb?'':gg.ic}</div><div class="nm">${esc(i.name)}</div>${i.tags.length?`<div class="tg">🏷 ${esc(i.tags.join(' '))}</div>`:''}</button>`}).join('')+`</div>`;
+}
+function detailHTML(it){
+  const g=GMAP[it.genre], dt=t=>{const d=new Date(t);return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`};
+  return `<div class="dx-det"><button class="dx-back" data-act="back">‹ 図鑑にもどる</button><div class="hero" style="${it.thumb?`background-image:url('${esc(it.thumb)}')`:`background:${g.c}33`}">${it.thumb?'':g.ic}<span class="no">No.${String(it.no).padStart(3,'0')}</span></div>
+  <div class="body"><h2>${esc(it.name)}</h2><span class="dx-chip" style="background:${g.c}">${g.ic} ${g.n}</span>${it.tags.map(t=>`<span class="dx-chip" style="background:#ff8a3d">🏷 ${esc(t)}</span>`).join('')}
+  <div class="st"><div>はじめて発見<b>${dt(it.first)}</b></div><div>見た回数<b>${it.count}回</b></div><div>${it.kind==='mt'?'標高':'発見時の距離'}<b>${it.kind==='mt'?Math.round(it.h)+'m':fmtD(it.dist||0)}</b></div></div>
+  <p>${esc(it.summary||'')}</p>${it.url?`<p style="font-size:11px;color:#6b7f84">出典: <a href="${esc(it.url)}" target="_blank" rel="noopener">Wikipedia</a>（内容は要確認）</p>`:''}
+  <div class="dx-btns"><button data-act="fly">🚀 もう一度飛ぶ</button><button class="sub" data-act="tag">🏷 タグ編集</button><a class="sub" href="https://www.google.com/maps/search/?api=1&query=${it.lat},${it.lon}" target="_blank" rel="noopener">🗺 地図で見る</a></div>
+  <div class="dx-btns"><button class="del" data-act="del">記録を削除</button></div></div></div>`;
+}
+function flipTo(html,dir){ const pg=$('dexPage'); pg.classList.remove('flipin','flipinR'); void pg.offsetWidth; pg.innerHTML=html; pg.scrollTop=0; layoutPage(); pg.classList.add(dir<0?'flipinR':'flipin'); bindPage(); SFX.page(); }
+function bindPage(){
+  const pg=$('dexPage');
+  pg.querySelectorAll('.dx-card').forEach(b=>b.onclick=()=>{DV.detail=b.dataset.id;flipTo(detailHTML(DEX.d.items[b.dataset.id]),1)});
+  pg.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{
+    const it=DEX.d.items[DV.detail]; const a=b.dataset.act;
+    if(a==='back'){DV.detail=null;renderNav();flipTo(listHTML(),-1)}
+    else if(a==='tag')openTags(it,()=>flipTo(detailHTML(it),1));
+    else if(a==='del'){ if(b.dataset.sure){delete DEX.d.items[it.id];dexSave();DV.detail=null;renderHead();renderNav();flipTo(listHTML(),-1)} else {b.dataset.sure=1;b.textContent='もう一度押すと削除'} }
+    else if(a==='fly'){ closeDex(); setTimeout(()=>flyTo(it),700); }
+  });
+}
+// ページのスワイプでジャンル切替
+(()=>{let sx=null;const pg=$('dexPage');pg.addEventListener('pointerdown',e=>{sx=e.clientX});pg.addEventListener('pointerup',e=>{if(sx==null||DV.detail)return;const dx=e.clientX-sx;sx=null;if(Math.abs(dx)<70)return;
+  const its=Object.values(DEX.d.items),order=['all',...GENRES.filter(g=>its.some(i=>i.genre===g.id)).map(g=>g.id)];let i=order.indexOf(DV.genre);i=clamp(i+(dx<0?1:-1),0,order.length-1);if(order[i]===DV.genre)return;DV.genre=order[i];renderNav();flipTo(listHTML(),dx<0?1:-1)})})();
+function flyTo(it){
+  const P=posNow(); const sp={name:it.name,title:it.title,lat:it.lat,lon:it.lon,kind:it.kind,h:it.h,r:it.r||120};
+  sp.d=dist(P.lat,P.lon,sp.lat,sp.lon); sp.b=bearing(P.lat,P.lon,sp.lat,sp.lon);
+  if(S.state!=='idle')back(); S.sel=sp; S.pull=CFG.pullMax; launch();
+}
+// --- タグ編集シート ---
+let tsIt=null,tsDone=null;
+function openTags(it,done){
+  tsIt=it; tsDone=done; $('tsTitle').textContent=`🏷 ${it.name} のタグ`; renderTags(); $('tagSheet').classList.add('show');
+}
+function renderTags(){
+  const d=dexLoad(), all=[...new Set(d.tags.concat(...Object.values(d.items).map(i=>i.tags)))];
+  $('tsChips').innerHTML=all.map(t=>`<button class="${tsIt.tags.includes(t)?'on':''}" data-t="${esc(t)}">${esc(t)}</button>`).join('');
+  $('tsChips').querySelectorAll('button').forEach(b=>b.onclick=()=>{const t=b.dataset.t,i=tsIt.tags.indexOf(t);i<0?tsIt.tags.push(t):tsIt.tags.splice(i,1);dexSave();renderTags()});
+}
+$('tsAdd').onclick=()=>{const t=$('tsIn').value.trim();if(!t)return;const d=dexLoad();if(!d.tags.includes(t))d.tags.push(t);if(!tsIt.tags.includes(t))tsIt.tags.push(t);$('tsIn').value='';dexSave();renderTags()};
+$('tsOk').onclick=()=>{$('tagSheet').classList.remove('show');tsDone&&tsDone();};
+$('bDex').onclick=()=>openDex(); $('dxClose').onclick=()=>closeDex();
+window.__dex={genreOf,dexLoad,dexRecord,openDex,DEX};
 // ---------- map / flight / orbit ----------
 let map=null,marker=null;
 try{
@@ -597,10 +864,10 @@ async function launch(){
   const exp=explain(sp);
   const dur=clamp(4200-(pull-CFG.pullMin)*(2400/(CFG.pullMax-CFG.pullMin)),1800,4200);
   const z=clamp(17.5-Math.log2((sp.r||120)/120)*1.2,12,17.5);
-  const b=bearing(S.pos.lat,S.pos.lon,sp.lat,sp.lon);
+  const P0=posNow(),b=bearing(P0.lat,P0.lon,sp.lat,sp.lon);
   $('ar').classList.add('away'); $('map').classList.add('show');
   if(map){
-    map.jumpTo({center:[S.pos.lon,S.pos.lat],zoom:14.5,pitch:72,bearing:S.heading});
+    map.jumpTo({center:[P0.lon,P0.lat],zoom:14.5,pitch:72,bearing:S.heading});
     if(marker)marker.remove(); marker=new maplibregl.Marker({color:'#ff5a5a'}).setLngLat([sp.lon,sp.lat]).addTo(map);
     map.flyTo({center:[sp.lon,sp.lat],zoom:z,pitch:62,bearing:b,duration:dur,essential:true,curve:1.5});
   }
@@ -610,9 +877,10 @@ async function launch(){
   S.cards=res.cards; S.src=res.src; S.cardIdx=-1; S.state='orbit'; S.paused=false;
   $('bPause').textContent='一時停止'; $('btns').style.display='flex';
   const c=$('card'); c.style.display='block';
-  c.innerHTML=`<h2>${esc(sp.name)}</h2><div class="sub">${fmtD(sp.d)} ／ 方位 ${Math.round(b)}°${sp.kind==='mt'?' ／ 標高 '+Math.round(sp.h)+' m':''}</div><div id="cb"></div><div class="dots">${S.cards.map(()=>'<i></i>').join('')}</div><div class="src">${res.src?`出典: <a href="${res.src}" target="_blank" rel="noopener">Wikipedia</a> ／ `:''}内容は要確認</div>`;
-  SFX.arrive(); S.cardIdx=-1; setTimeout(()=>{ if(my===token)setCard(0,my); },700); orbit(my);
+  c.innerHTML=`<h2>${esc(sp.name)}</h2><div class="sub">${fmtD(sp.d)} ／ 方位 ${Math.round(b)}°${sp.kind==='mt'?' ／ 標高 '+Math.round(sp.h)+' m':''}</div><div id="cb"></div><div class="dots">${S.cards.map(()=>'<i></i>').join('')}</div><div class="tagrow" id="cTags"></div><div class="src">${res.src?`出典: <a href="${res.src}" target="_blank" rel="noopener">Wikipedia</a> ／ `:''}内容は要確認</div>`;
+  SFX.arrive(); const rec=dexRecord(sp,res); S.curRec=rec.it; showGot(rec.it,rec.isNew); renderCardTags(); S.cardIdx=-1; setTimeout(()=>{ if(my===token)setCard(0,my); },1600); orbit(my);
 }
+function renderCardTags(){ const it=S.curRec,el=$('cTags'); if(!it||!el)return; el.innerHTML=it.tags.map(t=>`<span>${esc(t)}</span>`).join('')+`<button id="cTagB">🏷 タグ</button><button id="cDexB">📖 図鑑</button>`; $('cTagB').onclick=()=>openTags(it,renderCardTags); $('cDexB').onclick=()=>{const id=it.id;openDex();setTimeout(()=>{DV.detail=id;flipTo(detailHTML(DEX.d.items[id]),1)},1000)}; }
 function setCard(i,my){
   if(i===S.cardIdx||!S.cards.length||i>=S.cards.length)return; S.cardIdx=i; const c=S.cards[i];
   $('cb').innerHTML=`<div class="ch">${esc(c.h)}</div><div class="tx">${esc(c.t)}</div>`;
@@ -651,7 +919,7 @@ $('bSnd').onclick=()=>{SND.on=!SND.on;$('bSnd').textContent=SND.on?'🔊':'🔇'
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function fmtD(d){return d>=1000?(d/1000).toFixed(1)+' km':Math.round(d)+' m'}
 let tt=null;function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(tt);tt=setTimeout(()=>t.style.display='none',2600)}
-setInterval(()=>{ const idle=['idle','locked','pulling','choose','ready','firing'].includes(S.state); $('hud').style.display=idle?'block':'none'; $('bSnd').style.display=idle?'block':'none'; $('bEye').style.display=(idle&&!S.demo)?'block':'none'; const wt=idle?envWarn():''; $('warn').style.display=wt?'block':'none'; $('warn').textContent='⚠ '+wt; $('demo').style.display=(S.demo&&S.state==='idle')?'block':'none'; if(S.demo&&S.state==='idle'){$('sh').value=Math.round(S.heading)%360;$('dh').textContent=Math.round(S.heading)%360;} $('hud').textContent=`方位 ${Math.round(S.heading)}° 仰角 ${Math.round(S.pitch)}° ${S.demo?'[デモ]':''}${S.userOff?' 補正'+(S.userOff>0?'+':'')+Math.round(S.userOff)+'°':''} 精度 ${S.pos.acc?('±'+Math.round(S.pos.acc)+'m'):'-'} スポット ${S.visReady?S.spots.filter(x=>x.vis!==false).length+'/'+S.spots.length+'(見通し)':S.spots.length}`; },300);
+setInterval(()=>{ const idle=['idle','locked','pulling','choose','ready','firing'].includes(S.state); $('hud').style.display=idle?'block':'none'; $('bSnd').style.display=idle?'block':'none'; $('bDex').style.display=(idle&&$('intro').style.display==='none')?'block':'none'; $('bEye').style.display=(idle&&!S.demo)?'block':'none'; $('bTrain').style.display=(idle&&!S.demo)?'block':'none'; const wt=idle?envWarn():''; $('warn').style.display=wt?'block':'none'; $('warn').textContent='⚠ '+wt; $('demo').style.display=(S.demo&&S.state==='idle')?'block':'none'; if(S.demo&&S.state==='idle'){$('sh').value=Math.round(S.heading)%360;$('dh').textContent=Math.round(S.heading)%360;} $('hud').textContent=`${S.moving?'🚃車窓('+(S.side==null?'判定中':S.side>0?'右':'左')+') '+Math.round((S.pos.speed||0)*3.6)+'km/h ':''}方位 ${Math.round(S.heading)}° 仰角 ${Math.round(S.pitch)}° ${S.demo?'[デモ]':''}${S.userOff?' 補正'+(S.userOff>0?'+':'')+Math.round(S.userOff)+'°':''} 精度 ${S.pos.acc?('±'+Math.round(S.pos.acc)+'m'):'-'} スポット ${S.visReady?S.spots.filter(x=>x.vis!==false).length+'/'+S.spots.length+'(見通し)':S.spots.length}`; },300);
 $('hint').textContent='';
 async function begin(demo){
   audioInit(); unlockVoice();
@@ -660,6 +928,7 @@ async function begin(demo){
   await startSensors(); await startCamera(); startGeo();
 }
 $('bStart').onclick=()=>begin(false);
+dexBadge();
 addEventListener('resize',()=>{try{map&&map.resize()}catch(e){}});
 $('bDemo').onclick=()=>begin(true);
 </script>
