@@ -124,6 +124,24 @@ html,body{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;m
 #card .tagrow span{font-size:11px;background:#ff8a3d;color:#fff;border-radius:999px;padding:2px 8px}
 #card .tagrow button{font:inherit;font-size:12px;color:#fff;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:3px 10px}
 
+#bAlign{position:absolute;right:236px;top:max(10px,env(safe-area-inset-top));font-size:12px;background:rgba(10,14,28,.6);border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:8px 10px;color:#fff;z-index:4}
+#bAlign.on{background:#ffb703;color:#20343a;font-weight:800}
+#coach{position:fixed;inset:0;z-index:25;display:none;align-items:center;justify-content:center;background:rgba(4,20,30,.75);padding:20px}
+#coach.show{display:flex}
+#coach .cbx{background:linear-gradient(160deg,#1fb3a5,#1677c9);color:#fff;border-radius:24px;padding:22px;max-width:420px;box-shadow:0 20px 40px rgba(0,0,0,.4);border:4px solid #fff}
+#coach h2{margin:0 0 6px;font-size:22px;font-weight:900;text-align:center}
+#coach .cani{width:100%;height:auto;background:rgba(0,0,0,.18);border-radius:16px}
+#coach ol{padding-left:20px;line-height:1.8;font-size:14px;margin:12px 0 6px}#coach p{font-size:12px;opacity:.9;margin:0 0 12px}
+#coach button{width:100%;border:none;border-radius:14px;padding:14px;font:inherit;font-weight:900;font-size:16px;color:#1677c9;background:#fff;box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.chand{animation:hand 3.2s infinite}.cname{animation:cname 3.2s infinite}.carc{animation:carc 3.2s infinite}
+@keyframes hand{0%{transform:translate(150px,30px);opacity:0}10%{opacity:1;transform:translate(150px,30px)}20%{transform:translate(150px,30px) scale(.85)}55%{transform:translate(150px,190px) scale(.85)}62%{transform:translate(150px,190px) scale(1)}100%{transform:translate(150px,190px);opacity:0}}
+@keyframes cname{0%,18%{opacity:1}20%,60%{opacity:1;filter:drop-shadow(0 0 6px #ffd37a)}70%,100%{opacity:.4}}
+@keyframes carc{0%,30%{opacity:0}40%,60%{opacity:1}70%,100%{opacity:0}}
+.dx-badges{display:flex;gap:8px;overflow-x:auto;padding:4px 16px 8px}
+.dx-badge{flex:none;width:74px;text-align:center;font-size:10px;color:#6b7f84}
+.dx-badge i{display:flex;width:52px;height:52px;margin:0 auto 4px;border-radius:50%;align-items:center;justify-content:center;font-style:normal;font-size:24px;background:linear-gradient(#ffe08a,#f4a62a);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.dx-badge.lock i{background:#e3eceb;filter:grayscale(1);opacity:.5}
+.dx-streak{font-size:12px;font-weight:800;opacity:.95}
 #toast{position:absolute;left:50%;top:40%;transform:translateX(-50%);padding:8px 14px;font-size:13px;display:none}
 </style>
 </head>
@@ -133,6 +151,7 @@ html,body{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;m
   <div id="ar">
     <div id="sky"></div>
     <video id="cam" playsinline muted autoplay></video>
+    <svg id="lbl" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"></svg>
     <svg id="ov"></svg>
   </div>
   <div id="hud" class="glass"></div>
@@ -147,6 +166,8 @@ html,body{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;m
   <div id="warn" class="glass"></div>
   <button id="bEye">目線 1.5m</button>
   <button id="bTrain">🚃 自動</button>
+  <button id="bAlign">🧭 方位合わせ</button>
+  <div id="coach"><div class="cbx"><h2>使い方は3ステップ</h2><svg viewBox="0 0 300 220" class="cani"><circle cx="150" cy="60" r="26" fill="none" stroke="#7cf2de" stroke-width="3" stroke-dasharray="6 4"/><g class="cname"><rect x="95" y="14" width="110" height="26" rx="13" fill="#fff"/><text x="150" y="32" text-anchor="middle" font-size="13" font-weight="800" fill="#1677c9">⛩ 〇〇神社</text></g><path class="carc" d="M150 190 Q100 60 150 60" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="3 8"/><g class="chand"><circle r="16" fill="#ffd37a" opacity=".9"/><text y="7" text-anchor="middle" font-size="22">👆</text></g></svg><ol><li><b>名前をタップ</b>（または景色を長押し）でロック</li><li>そのまま<b>パチンコのように引いて</b>、離すと発射</li><li>着いたら360°回りながら<b>音声で解説</b>。図鑑に自動で記録</li></ol><p>名前の位置が実物とずれていたら、右上の<b>🧭方位合わせ</b>で左右にドラッグ。</p><button id="coachOk">はじめる</button></div></div>
   <button id="bSnd" style="position:absolute;right:10px;top:max(10px,env(safe-area-inset-top));font-size:18px;background:rgba(10,14,28,.6);border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:6px 10px;color:#fff;z-index:4">🔊</button>
   <div class="btns" id="btns"><button id="bTts">読み上げ ON</button><button id="bPause">一時停止</button><button id="bBack">戻る</button></div>
   <div id="card" class="glass"></div>
@@ -233,7 +254,7 @@ return maplibregl$1;
 </script>
 <script>
 'use strict';
-const CFG={vFov:65,bldgRadius:600,camFovLong:64,poiRadius:10000,mtRadiusKm:60,pullMin:80,pullMax:240,lockMs:300,lockMove:12,orbitMs:30000,llmEndpoint:'',defaultPos:{lat:38.2601,lon:140.8824,acc:0,alt:null}};
+const CFG={vFov:65,maxLabels:12,bldgRadius:600,camFovLong:64,poiRadius:10000,mtRadiusKm:60,pullMin:80,pullMax:240,lockMs:300,lockMove:12,orbitMs:30000,llmEndpoint:'',defaultPos:{lat:38.2601,lon:140.8824,acc:0,alt:null}};
 // 既知スポット（デモ/フォールバック用。座標は概算で【要確認】）。r=スポット半径m, h=想定高さm
 const FALLBACK=[
  {name:'仙台城',lat:38.2514,lon:140.8566,r:250,h:120},
@@ -517,13 +538,17 @@ ov.addEventListener('pointerdown',e=>{
     clearTimeout(chooseT); S.anchor={x:e.clientX,y:e.clientY}; setGain(e.clientX,e.clientY); S.fx=e.clientX; S.fy=e.clientY; S.finger={...S.anchor}; S.pull=0; S.armed=false; S.state='locked';
     $('chips').style.display='none'; $('hint').textContent='そのまま後ろへ引いて、離すと飛びます'; drawOv(); return;
   }
+  if(S.align){ ov.setPointerCapture(e.pointerId); S.alX=e.clientX; return; }
   if(S.state==='choose')cancelLock();
   if(S.state!=='idle')return;
+  const hl=hitLabel(e.clientX,e.clientY);
+  if(hl){ ov.setPointerCapture(e.pointerId); down={x:e.clientX,y:e.clientY,id:e.pointerId}; lockSpot(hl.c,e.clientX,e.clientY); return; }
   ov.setPointerCapture(e.pointerId);
   down={x:e.clientX,y:e.clientY,id:e.pointerId};
   timer=setTimeout(()=>{ if(!down)return; lock(down.x,down.y); },CFG.lockMs);
 });
 ov.addEventListener('pointermove',e=>{
+  if(S.align&&S.alX!=null){ alignDrag(e.clientX-S.alX); S.alX=e.clientX; return; }
   if(!down)return;
   if(S.state==='idle'&&Math.hypot(e.clientX-down.x,e.clientY-down.y)>(S.moving?28:CFG.lockMove)){clearTimeout(timer);down=null;return}
   if(S.state==='locked'||S.state==='pulling'){
@@ -538,6 +563,7 @@ ov.addEventListener('pointermove',e=>{
   }
 });
 function end(e){
+  if(S.align){S.alX=null;return}
   clearTimeout(timer);
   const was=S.state; down=null;
   if(was==='pulling'&&S.pull>=CFG.pullMin){ vib(40); fire(); }
@@ -553,6 +579,11 @@ function lock(x,y){
   setLabel();
   $('hint').textContent='そのまま後ろへ引いて、離すと飛びます';
   drawOv();
+}
+function lockSpot(c,x,y){
+  const r=resolve(x,y); S.lockAz=c.b; const sp={...c.s,d:c.d,b:c.b,score:0};
+  S.cand=[sp].concat(r.list.filter(q=>q.name!==sp.name)).slice(0,3); S.sel=sp; S.anchor={x,y}; setGain(x,y); S.fx=x; S.fy=y; S.pull=0; S.armed=false; S.finger={x,y}; S.state='locked'; vib(10); SFX.lock(); S.lastStep=0;
+  const l=$('label'); l.style.display='block'; setLabel(); $('hint').textContent='そのまま後ろへ引いて、離すと飛びます'; drawOv();
 }
 function setLabel(){ $('label').innerHTML=`${esc(S.sel.name)}<small>${fmtD(S.sel.d)}${S.sel.kind==='mt'?' ／ 標高'+Math.round(S.sel.h)+'m':''}</small>`; }
 let chooseT=null;
@@ -574,7 +605,7 @@ function pick(i){
   clearTimeout(chooseT); chooseT=setTimeout(()=>{ if(S.state==='ready')cancelLock(); },8000);
 }
 function cancelLock(){ if(S.state!=='idle')SFX.cancel(); clearTimeout(chooseT); $('chips').style.display='none'; S.state='idle'; S.sel=null; S.pull=0; $('label').style.display='none'; $('hint').textContent=HINT; drawOv(); }
-const HINT='気になる場所を長押ししてロック';
+const HINT='名前をタップ、または景色を長押ししてロック';
 function setGain(x,y){
   // 一番広い方向の余白を基準に増幅率を決める（画面端でロックしても最大まで引ける）
   const room=Math.max(50,Math.max(innerHeight-y,y,x,innerWidth-x)-50);
@@ -758,6 +789,7 @@ function dexRecord(sp,res){
   const d=dexLoad(), id=sp.title||sp.name; let it=d.items[id]; const isNew=!it;
   if(!it){ it=d.items[id]={id,no:++d.seq,name:sp.name,lat:sp.lat,lon:sp.lon,kind:sp.kind||'',h:sp.h,r:sp.r,title:sp.title||'',genre:genreOf(sp,res.intro),tags:[],first:Date.now(),count:0};
     if(S.moving)it.tags.push('車窓'); }
+  d.days=d.days||{}; const dk=dayKey(Date.now()); d.days[dk]=(d.days[dk]||0)+1;
   it.count++; it.last=Date.now(); it.dist=Math.round(sp.d||0); it.url=res.src||it.url||''; if(res.thumb)it.thumb=res.thumb;
   if(res.cards&&res.cards[0])it.summary=res.cards[0].t;
   dexSave(); return {it,isNew};
@@ -782,7 +814,7 @@ function closeDex(){ const el=$('dex'); el.classList.remove('open'); SFX.book();
 function layoutPage(){ $('dxNav').style.display=DV.detail?'none':'block'; const h=document.querySelector('.dx-head').offsetHeight+(DV.detail?0:$('dxNav').offsetHeight); $('dexPage').style.top=h+'px'; }
 function renderHead(){
   const its=Object.values(DEX.d.items), n=its.length, L=lvOf(n), gs=new Set(its.map(i=>i.genre)).size;
-  $('dxLv').textContent=L.lv; $('dxBar').style.width=(L.frac*100)+'%'; $('dxTitle').textContent=`スポット図鑑  ${n}件 ／ ${gs}ジャンル`;
+  $('dxLv').textContent=L.lv; $('dxBar').style.width=(L.frac*100)+'%'; const st=streakOf(DEX.d.days||{}),td=(DEX.d.days||{})[dayKey(Date.now())]||0; $('dxTitle').innerHTML=`スポット図鑑  ${n}件 ／ ${gs}ジャンル<div class="dx-streak">🔥 ${st}日連続 ・ 今日 ${td}件</div>`;
 }
 function renderNav(){
   const its=Object.values(DEX.d.items), cnt=g=>its.filter(i=>i.genre===g).length;
@@ -798,8 +830,9 @@ function listHTML(){
   const its=Object.values(DEX.d.items).filter(i=>(DV.genre==='all'||i.genre===DV.genre)&&(!DV.tag||i.tags.includes(DV.tag))).sort((a,b)=>a.no-b.no);
   if(!Object.keys(DEX.d.items).length)return `<div class="dx-empty">まだ記録がありません。<br>景色の気になる場所をパチンコで狙って飛ぶと、ここに登録されます。</div>`;
   if(!its.length)return `<div class="dx-empty">該当する記録がありません。</div>`;
-  const g=GMAP[DV.genre], head=DV.genre==='all'?`<div class="dx-sec"><span>すべての記録</span><span class="dx-medal">${GENRES.filter(x=>Object.values(DEX.d.items).some(i=>i.genre===x.id)).map(x=>x.ic).join('')}</span></div>`
-    :`<div class="dx-sec"><span>${g.ic} ${g.n}</span><span class="dx-medal">${medal(its.length)}${its.length<10?` ／ 次まで ${its.length<1?1:its.length<5?5-its.length:10-its.length}件`:''}</span></div>`;
+  const badges=DV.genre==='all'&&!DV.tag?`<div class="dx-sec"><span>🏅 実績</span></div><div class="dx-badges">${badgesOf().map(([ic,t,ok])=>`<div class="dx-badge ${ok?'':'lock'}"><i>${ic}</i>${t}</div>`).join('')}</div>`:'';
+  const g=GMAP[DV.genre], head=badges+(DV.genre==='all'?`<div class="dx-sec"><span>すべての記録</span><span class="dx-medal">${GENRES.filter(x=>Object.values(DEX.d.items).some(i=>i.genre===x.id)).map(x=>x.ic).join('')}</span></div>`
+    :`<div class="dx-sec"><span>${g.ic} ${g.n}</span><span class="dx-medal">${medal(its.length)}${its.length<10?` ／ 次まで ${its.length<1?1:its.length<5?5-its.length:10-its.length}件`:''}</span></div>`);
   return head+`<div class="dx-grid">`+its.map(i=>{const gg=GMAP[i.genre];return `<button class="dx-card" data-id="${esc(i.id)}" style="--gc:${gg.c}"><span class="no">No.${String(i.no).padStart(3,'0')}</span><div class="ph" style="${i.thumb?`background-image:url('${esc(i.thumb)}')`:''}">${i.thumb?'':gg.ic}</div><div class="nm">${esc(i.name)}</div>${i.tags.length?`<div class="tg">🏷 ${esc(i.tags.join(' '))}</div>`:''}</button>`}).join('')+`</div>`;
 }
 function detailHTML(it){
@@ -808,7 +841,7 @@ function detailHTML(it){
   <div class="body"><h2>${esc(it.name)}</h2><span class="dx-chip" style="background:${g.c}">${g.ic} ${g.n}</span>${it.tags.map(t=>`<span class="dx-chip" style="background:#ff8a3d">🏷 ${esc(t)}</span>`).join('')}
   <div class="st"><div>はじめて発見<b>${dt(it.first)}</b></div><div>見た回数<b>${it.count}回</b></div><div>${it.kind==='mt'?'標高':'発見時の距離'}<b>${it.kind==='mt'?Math.round(it.h)+'m':fmtD(it.dist||0)}</b></div></div>
   <p>${esc(it.summary||'')}</p>${it.url?`<p style="font-size:11px;color:#6b7f84">出典: <a href="${esc(it.url)}" target="_blank" rel="noopener">Wikipedia</a>（内容は要確認）</p>`:''}
-  <div class="dx-btns"><button data-act="fly">🚀 もう一度飛ぶ</button><button class="sub" data-act="tag">🏷 タグ編集</button><a class="sub" href="https://www.google.com/maps/search/?api=1&query=${it.lat},${it.lon}" target="_blank" rel="noopener">🗺 地図で見る</a></div>
+  <div class="dx-btns"><button data-act="fly">🚀 もう一度飛ぶ</button><button class="sub" data-act="tag">🏷 タグ編集</button><button class="sub" data-act="share">📤 共有</button><a class="sub" href="https://www.google.com/maps/search/?api=1&query=${it.lat},${it.lon}" target="_blank" rel="noopener">🗺 地図で見る</a></div>
   <div class="dx-btns"><button class="del" data-act="del">記録を削除</button></div></div></div>`;
 }
 function flipTo(html,dir){ const pg=$('dexPage'); pg.classList.remove('flipin','flipinR'); void pg.offsetWidth; pg.innerHTML=html; pg.scrollTop=0; layoutPage(); pg.classList.add(dir<0?'flipinR':'flipin'); bindPage(); SFX.page(); }
@@ -819,6 +852,7 @@ function bindPage(){
     const it=DEX.d.items[DV.detail]; const a=b.dataset.act;
     if(a==='back'){DV.detail=null;renderNav();flipTo(listHTML(),-1)}
     else if(a==='tag')openTags(it,()=>flipTo(detailHTML(it),1));
+    else if(a==='share')shareSpot(it);
     else if(a==='del'){ if(b.dataset.sure){delete DEX.d.items[it.id];dexSave();DV.detail=null;renderHead();renderNav();flipTo(listHTML(),-1)} else {b.dataset.sure=1;b.textContent='もう一度押すと削除'} }
     else if(a==='fly'){ closeDex(); setTimeout(()=>flyTo(it),700); }
   });
@@ -845,6 +879,92 @@ $('tsAdd').onclick=()=>{const t=$('tsIn').value.trim();if(!t)return;const d=dexL
 $('tsOk').onclick=()=>{$('tagSheet').classList.remove('show');tsDone&&tsDone();};
 $('bDex').onclick=()=>openDex(); $('dxClose').onclick=()=>closeDex();
 window.__dex={genreOf,dexLoad,dexRecord,openDex,DEX};
+
+// ---------- AR名前ラベル（見えるスポットを常時表示・タップで照準） ----------
+function camFp(){ const W=innerWidth,H=innerHeight,v=$('cam');
+  if(v.videoWidth){const sc=Math.max(W/v.videoWidth,H/v.videoHeight);return sc*(Math.max(v.videoWidth,v.videoHeight)/2)/Math.tan(CFG.camFovLong/2*D)}
+  return (Math.max(W,H)/2)/Math.tan(CFG.camFovLong/2*D); }
+function project(az,el){
+  const W=innerWidth,H=innerHeight;
+  if(S.demo||!S.M){ const f=(H/2)/Math.tan(CFG.vFov/2*D),da=angDiff(az,S.heading); if(Math.abs(da)>75)return null;
+    return {x:W/2+f*Math.tan(da*D),y:H/2-f*Math.tan((el-S.pitch)*D)}; }
+  const mv=trainActive(),M=mv?S.Mg:S.M,off=(mv?S.trainC:S.sensorOff)+S.userOff,fp=camFp();
+  const th=scrAngle()*D,c=Math.cos(th),sn=Math.sin(th),a=(az-off)*D,e=el*D;
+  const v=[Math.sin(a)*Math.cos(e),Math.cos(a)*Math.cos(e),Math.sin(e)];
+  const f=[-M.Z[0],-M.Z[1],-M.Z[2]],r=[0,1,2].map(i=>M.X[i]*c-M.Y[i]*sn),u=[0,1,2].map(i=>M.X[i]*sn+M.Y[i]*c);
+  const dot=(p,q)=>p[0]*q[0]+p[1]*q[1]+p[2]*q[2],z=dot(v,f); if(z<=0.05)return null;
+  return {x:W/2+fp*dot(v,r)/z,y:H/2-fp*dot(v,u)/z};
+}
+function spotEl(s,d){ const eye=S.ground!=null?S.ground+S.eyeH:30, R=6371000;
+  const top=s.kind==='mt'?s.h:((elevAt(s.lat,s.lon)??(S.ground??0))+(s.h||40));
+  return Math.atan2(top-eye-0.87*d*d/(2*R),d)/D; }
+function drawLabels(){
+  const svg=$('lbl'); const showStates=['idle','choose','ready'];
+  if(!showStates.includes(S.state)||$('intro').style.display!=='none'||$('dex').classList.contains('show')){ if(svg.innerHTML)svg.innerHTML=''; S.labels=[]; return; }
+  const P=posNow(),W=innerWidth,H=innerHeight,dex=dexLoad().items,cands=[];
+  for(const s of S.spots){
+    if(!S.demo&&S.visReady&&s.vis===false&&!S.moving)continue;
+    const d=dist(P.lat,P.lon,s.lat,s.lon); if(d<40||d>(s.kind==='mt'?CFG.mtRadiusKm*1000:6000))continue;
+    const b=bearing(P.lat,P.lon,s.lat,s.lon), pt=project(b,spotEl(s,d)); if(!pt||pt.x<-40||pt.x>W+40||pt.y<60||pt.y>H-60)continue;
+    const pr=(s.kind==='mt'?2+s.h/1000:1)/(1+d/2500);
+    cands.push({s,d,b,pt,pr});
+  }
+  cands.sort((a,b)=>b.pr-a.pr);
+  const placed=[],out=[];
+  for(const c of cands){ if(placed.length>=CFG.maxLabels)break;
+    const name=c.s.name.length>14?c.s.name.slice(0,13)+'…':c.s.name, g=GMAP[genreOf(c.s,'')], got=!!dex[c.s.title||c.s.name];
+    const sub=fmtD(c.d)+(c.s.kind==='mt'?' ・ '+Math.round(c.s.h)+'m':''), w=Math.max(70,name.length*14,sub.length*7)+50, h=40; let x0=clamp(c.pt.x-w/2,6,W-w-6), y0=c.pt.y-h-34;
+    let tries=0; while(placed.some(r=>!(x0+w<r.x0||x0>r.x1||y0+h<r.y0||y0>r.y1))&&tries<4){y0-=h+6;tries++}
+    if(tries>=4||y0<50)continue;
+    const R={x0,y0,x1:x0+w,y1:y0+h,c}; placed.push(R);
+    const ann=S.annHi&&S.annHi===c.s.name;
+    out.push(`<g opacity="${ann?1:.95}"><line x1="${c.pt.x}" y1="${y0+h}" x2="${c.pt.x}" y2="${c.pt.y}" stroke="#fff" stroke-width="1.5" opacity=".8"/><circle cx="${c.pt.x}" cy="${c.pt.y}" r="4" fill="${g.c}" stroke="#fff" stroke-width="2"/>
+      <rect x="${x0}" y="${y0}" width="${w}" height="${h}" rx="20" fill="${ann?'#ffb703':'rgba(255,255,255,.94)'}" stroke="${g.c}" stroke-width="2.5"/>
+      <text x="${x0+12}" y="${y0+26}" font-size="16">${g.ic}</text>
+      <text x="${x0+36}" y="${y0+18}" font-size="13" font-weight="800" fill="#20343a">${esc(name)}</text>
+      <text x="${x0+36}" y="${y0+33}" font-size="10.5" fill="#557">${sub}</text>
+      ${got?`<circle cx="${x0+w-6}" cy="${y0+4}" r="9" fill="#2ecc71" stroke="#fff" stroke-width="2"/><text x="${x0+w-6}" y="${y0+8}" font-size="11" text-anchor="middle" fill="#fff" font-weight="900">✓</text>`:''}</g>`);
+  }
+  S.labels=placed; svg.innerHTML=out.join('');
+}
+setInterval(drawLabels,80);
+function hitLabel(x,y){ return (S.labels||[]).find(r=>x>=r.x0-6&&x<=r.x1+6&&y>=r.y0-6&&y<=r.y1+6); }
+// ---------- 方位合わせ（ドラッグでラベルを実物に重ねる） ----------
+$('bAlign').onclick=()=>{ S.align=!S.align; $('bAlign').classList.toggle('on',S.align); $('bAlign').textContent=S.align?'✓ 完了':'🧭 方位合わせ';
+  $('hint').textContent=S.align?'名前が実物に重なるよう、画面を左右にドラッグ':HINT; if(S.align)toast('ラベルを実物の位置まで左右にドラッグしてください'); };
+function alignDrag(dx){ const fp=S.demo||!S.M?(innerHeight/2)/Math.tan(CFG.vFov/2*D):camFp(), dd=Math.atan(dx/fp)/D;
+  if(S.demo||!S.M)S.heading=norm(S.heading-dd); else {S.userOff=clamp(S.userOff-dd,-90,90); updHeading();} }
+// ---------- 車窓の自動案内（まもなく右手に〇〇） ----------
+S.announced=new Set();
+setInterval(()=>{
+  if(!S.moving||S.side==null||!(S.pos.course>=0)||!S.visReady||S.state==='orbit'||S.state==='flying')return;
+  const P=posNow(),side=norm(S.pos.course+90*S.side),EV=eyeAt(P); let best=null;
+  for(const s of S.spots){ if(S.announced.has(s.name))continue; const d=dist(P.lat,P.lon,s.lat,s.lon); if(d<150||d>(s.kind==='mt'?40000:3000))continue;
+    const b=bearing(P.lat,P.lon,s.lat,s.lon); if(Math.abs(angDiff(b,side))>35)continue;
+    if(visOne(s,P,EV.eye,EV.g0,null))continue;
+    const pr=(s.kind==='mt'?2+s.h/1000:1)/(1+d/2000); if(!best||pr>best.pr)best={s,d,pr}; }
+  if(best){ S.announced.add(best.s.name); S.annHi=best.s.name; setTimeout(()=>{if(S.annHi===best.s.name)S.annHi=null},12000);
+    const msg=`${S.side>0?'右手':'左手'}に ${best.s.name}（${fmtD(best.d)}）`; toast('▶ '+msg); tone({f:1568,dur:.18,vol:.1});tone({f:2093,dur:.25,vol:.08,at:.12});
+    if(S.tts&&S.state==='idle')say(msg+' が見えます'); }
+},2500);
+// ---------- 初回ガイド ----------
+function showCoach(){ try{ if(localStorage.getItem('coach.v1'))return; }catch(e){} $('coach').classList.add('show'); }
+$('coachOk').onclick=()=>{ $('coach').classList.remove('show'); try{localStorage.setItem('coach.v1','1')}catch(e){} };
+// ---------- 共有 ----------
+async function shareSpot(it){
+  const text=`「${it.name}」を見つけた！ No.${String(it.no).padStart(3,'0')} ${GMAP[it.genre].n} #スポット図鑑 #SlingSpotAR`;
+  const url=it.url||location.href;
+  try{ if(navigator.share){ await navigator.share({title:it.name,text,url}); return; } }catch(e){ if(e&&e.name==='AbortError')return; }
+  try{ await navigator.clipboard.writeText(text+' '+url); toast('共有用のテキストをコピーしました'); }catch(e){ toast('共有できませんでした'); }
+}
+// ---------- 連続日数・実績 ----------
+const dayKey=t=>{const d=new Date(t);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+function streakOf(days){ let n=0,t=Date.now(); if(!days[dayKey(t)])t-=86400000; while(days[dayKey(t)]){n++;t-=86400000} return n; }
+function badgesOf(){
+  const d=dexLoad(),its=Object.values(d.items),n=its.length,gs=new Set(its.map(i=>i.genre)).size,st=streakOf(d.days||{});
+  return [['🌱','はじめての発見',n>=1],['📚','コレクター 10件',n>=10],['👑','マスター 30件',n>=30],['🎨','5ジャンル制覇',gs>=5],
+    ['⛰️','山の達人 5座',its.filter(i=>i.genre==='mt').length>=5],['🚃','車窓ハンター 5件',its.filter(i=>i.tags.includes('車窓')).length>=5],['🔥','3日連続',st>=3]];
+}
 // ---------- map / flight / orbit ----------
 let map=null,marker=null;
 try{
@@ -880,7 +1000,7 @@ async function launch(){
   c.innerHTML=`<h2>${esc(sp.name)}</h2><div class="sub">${fmtD(sp.d)} ／ 方位 ${Math.round(b)}°${sp.kind==='mt'?' ／ 標高 '+Math.round(sp.h)+' m':''}</div><div id="cb"></div><div class="dots">${S.cards.map(()=>'<i></i>').join('')}</div><div class="tagrow" id="cTags"></div><div class="src">${res.src?`出典: <a href="${res.src}" target="_blank" rel="noopener">Wikipedia</a> ／ `:''}内容は要確認</div>`;
   SFX.arrive(); const rec=dexRecord(sp,res); S.curRec=rec.it; showGot(rec.it,rec.isNew); renderCardTags(); S.cardIdx=-1; setTimeout(()=>{ if(my===token)setCard(0,my); },1600); orbit(my);
 }
-function renderCardTags(){ const it=S.curRec,el=$('cTags'); if(!it||!el)return; el.innerHTML=it.tags.map(t=>`<span>${esc(t)}</span>`).join('')+`<button id="cTagB">🏷 タグ</button><button id="cDexB">📖 図鑑</button>`; $('cTagB').onclick=()=>openTags(it,renderCardTags); $('cDexB').onclick=()=>{const id=it.id;openDex();setTimeout(()=>{DV.detail=id;flipTo(detailHTML(DEX.d.items[id]),1)},1000)}; }
+function renderCardTags(){ const it=S.curRec,el=$('cTags'); if(!it||!el)return; el.innerHTML=it.tags.map(t=>`<span>${esc(t)}</span>`).join('')+`<button id="cTagB">🏷 タグ</button><button id="cDexB">📖 図鑑</button><button id="cShB">📤 共有</button>`; $('cShB').onclick=()=>shareSpot(it); $('cTagB').onclick=()=>openTags(it,renderCardTags); $('cDexB').onclick=()=>{const id=it.id;openDex();setTimeout(()=>{DV.detail=id;flipTo(detailHTML(DEX.d.items[id]),1)},1000)}; }
 function setCard(i,my){
   if(i===S.cardIdx||!S.cards.length||i>=S.cards.length)return; S.cardIdx=i; const c=S.cards[i];
   $('cb').innerHTML=`<div class="ch">${esc(c.h)}</div><div class="tx">${esc(c.t)}</div>`;
@@ -919,10 +1039,10 @@ $('bSnd').onclick=()=>{SND.on=!SND.on;$('bSnd').textContent=SND.on?'🔊':'🔇'
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function fmtD(d){return d>=1000?(d/1000).toFixed(1)+' km':Math.round(d)+' m'}
 let tt=null;function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(tt);tt=setTimeout(()=>t.style.display='none',2600)}
-setInterval(()=>{ const idle=['idle','locked','pulling','choose','ready','firing'].includes(S.state); $('hud').style.display=idle?'block':'none'; $('bSnd').style.display=idle?'block':'none'; $('bDex').style.display=(idle&&$('intro').style.display==='none')?'block':'none'; $('bEye').style.display=(idle&&!S.demo)?'block':'none'; $('bTrain').style.display=(idle&&!S.demo)?'block':'none'; const wt=idle?envWarn():''; $('warn').style.display=wt?'block':'none'; $('warn').textContent='⚠ '+wt; $('demo').style.display=(S.demo&&S.state==='idle')?'block':'none'; if(S.demo&&S.state==='idle'){$('sh').value=Math.round(S.heading)%360;$('dh').textContent=Math.round(S.heading)%360;} $('hud').textContent=`${S.moving?'🚃車窓('+(S.side==null?'判定中':S.side>0?'右':'左')+') '+Math.round((S.pos.speed||0)*3.6)+'km/h ':''}方位 ${Math.round(S.heading)}° 仰角 ${Math.round(S.pitch)}° ${S.demo?'[デモ]':''}${S.userOff?' 補正'+(S.userOff>0?'+':'')+Math.round(S.userOff)+'°':''} 精度 ${S.pos.acc?('±'+Math.round(S.pos.acc)+'m'):'-'} スポット ${S.visReady?S.spots.filter(x=>x.vis!==false).length+'/'+S.spots.length+'(見通し)':S.spots.length}`; },300);
+setInterval(()=>{ const idle=['idle','locked','pulling','choose','ready','firing'].includes(S.state); $('hud').style.display=idle?'block':'none'; $('bSnd').style.display=idle?'block':'none'; $('bDex').style.display=(idle&&$('intro').style.display==='none')?'block':'none'; $('bEye').style.display=(idle&&!S.demo)?'block':'none'; $('bTrain').style.display=(idle&&!S.demo)?'block':'none'; $('bAlign').style.display=(idle&&$('intro').style.display==='none')?'block':'none'; const wt=idle?envWarn():''; $('warn').style.display=wt?'block':'none'; $('warn').textContent='⚠ '+wt; $('demo').style.display=(S.demo&&S.state==='idle')?'block':'none'; if(S.demo&&S.state==='idle'){$('sh').value=Math.round(S.heading)%360;$('dh').textContent=Math.round(S.heading)%360;} $('hud').textContent=`${S.moving?'🚃車窓('+(S.side==null?'判定中':S.side>0?'右':'左')+') '+Math.round((S.pos.speed||0)*3.6)+'km/h ':''}方位 ${Math.round(S.heading)}° 仰角 ${Math.round(S.pitch)}° ${S.demo?'[デモ]':''}${S.userOff?' 補正'+(S.userOff>0?'+':'')+Math.round(S.userOff)+'°':''} 精度 ${S.pos.acc?('±'+Math.round(S.pos.acc)+'m'):'-'} スポット ${S.visReady?S.spots.filter(x=>x.vis!==false).length+'/'+S.spots.length+'(見通し)':S.spots.length}`; },300);
 $('hint').textContent='';
 async function begin(demo){
-  audioInit(); unlockVoice();
+  audioInit(); unlockVoice(); setTimeout(showCoach,600);
   $('intro').style.display='none'; $('hint').textContent=HINT;
   if(demo){ enterDemo(); $('cam').style.display='none'; refreshSpots(); return; }
   await startSensors(); await startCamera(); startGeo();
