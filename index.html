@@ -43,6 +43,8 @@ html,body{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;m
 #chips{position:absolute;left:50%;top:max(104px,calc(env(safe-area-inset-top) + 94px));transform:translateX(-50%);display:none;gap:8px;flex-wrap:wrap;justify-content:center;max-width:94vw;z-index:3}
 #chips button{font:inherit;font-size:14px;color:#fff;background:rgba(10,14,28,.75);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:8px 14px}
 #chips button.on{background:#2f7cf6;border-color:#2f7cf6}
+#warn{position:absolute;left:10px;top:max(44px,calc(env(safe-area-inset-top) + 36px));max-width:min(92vw,520px);padding:6px 10px;font-size:12px;color:#ffd37a;display:none;pointer-events:none}
+#bEye{position:absolute;right:58px;top:max(10px,env(safe-area-inset-top));font-size:12px;background:rgba(10,14,28,.6);border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:8px 10px;color:#fff;z-index:4}
 #toast{position:absolute;left:50%;top:40%;transform:translateX(-50%);padding:8px 14px;font-size:13px;display:none}
 </style>
 </head>
@@ -63,13 +65,15 @@ html,body{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;m
     仰角 <span id="dp">0</span>° <input id="sp" type="range" min="-30" max="40" value="0">
   </div>
   <div id="toast" class="glass"></div>
+  <div id="warn" class="glass"></div>
+  <button id="bEye">目線 1.5m</button>
   <button id="bSnd" style="position:absolute;right:10px;top:max(10px,env(safe-area-inset-top));font-size:18px;background:rgba(10,14,28,.6);border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:6px 10px;color:#fff;z-index:4">🔊</button>
   <div class="btns" id="btns"><button id="bTts">読み上げ ON</button><button id="bPause">一時停止</button><button id="bBack">戻る</button></div>
   <div id="card" class="glass"></div>
   <div id="intro">
     <h1>Sling Spot AR（仮称）</h1>
     <p>景色の気になる場所を<b>長押し</b>でロック → <b>パチンコのように引いて離す</b>と、その場所へ飛んで360°回りながら解説します。</p>
-    <p style="font-size:12px;opacity:.75">候補が違うときは、引かずに指を離すと候補が出ます。正しい候補を選ぶと方位のズレが自動補正されます。</p>
+    <p style="font-size:12px;opacity:.75">手前の建物や山に遮られて見えないスポットは選ばれません。高層階では右上の「目線」で高さを設定してください。<br>候補が違うときは、引かずに指を離すと候補が出ます。正しい候補を選ぶと方位のズレが自動補正されます。</p>
     <p style="font-size:12px;opacity:.75">🔊 効果音と解説の読み上げがあります。音が出ない場合は消音設定と音量を確認してください。</p>
     <p class="warn">⚠ 歩行中・運転中は使用しないでください。周囲の安全を確認して使用してください。</p>
     <p style="font-size:11px;opacity:.65">カメラ映像は端末外へ送信されません。周辺スポット検索のため、現在地の座標がWikipedia・Wikidataへ送信されます（保存はしません）。解説はWikipedia記事の抜粋で、正確性は保証されません。</p>
@@ -139,7 +143,7 @@ return maplibregl$1;
 </script>
 <script>
 'use strict';
-const CFG={vFov:65,camFovLong:64,poiRadius:10000,mtRadiusKm:60,pullMin:80,pullMax:240,lockMs:300,lockMove:12,orbitMs:30000,llmEndpoint:'',defaultPos:{lat:38.2601,lon:140.8824,acc:0,alt:null}};
+const CFG={vFov:65,bldgRadius:600,camFovLong:64,poiRadius:10000,mtRadiusKm:60,pullMin:80,pullMax:240,lockMs:300,lockMove:12,orbitMs:30000,llmEndpoint:'',defaultPos:{lat:38.2601,lon:140.8824,acc:0,alt:null}};
 // 既知スポット（デモ/フォールバック用。座標は概算で【要確認】）。r=スポット半径m, h=想定高さm
 const FALLBACK=[
  {name:'仙台城',lat:38.2514,lon:140.8566,r:250,h:120},
@@ -151,7 +155,7 @@ const FALLBACK=[
 ];
 const D=Math.PI/180;
 const $=id=>document.getElementById(id);
-const S={state:'idle',heading:0,pitch:0,pos:{...CFG.defaultPos},demo:false,sensor:false,gotAbs:false,spots:FALLBACK.slice(),cand:[],sel:null,anchor:null,pull:0,cards:[],tts:true,paused:false,cardIdx:-1,lastFetch:null,debug:{},M:null,sensorOff:0,userOff:0,calibN:0,gotWeb:false,forceAngle:null};
+const S={state:'idle',heading:0,pitch:0,pos:{...CFG.defaultPos},demo:false,sensor:false,gotAbs:false,spots:FALLBACK.slice(),cand:[],sel:null,anchor:null,pull:0,cards:[],tts:true,paused:false,cardIdx:-1,lastFetch:null,debug:{},M:null,sensorOff:0,userOff:0,calibN:0,gotWeb:false,forceAngle:null,eyeH:1.5,compAcc:null,inside:null,visReady:false};
 window.__S=S;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const angDiff=(a,b)=>((((a-b+540)%360)+360)%360)-180;
@@ -182,7 +186,7 @@ function onOri(e){
   const hRel=norm(Math.atan2(-Z[0],-Z[1])/D);
   const p=Math.asin(clamp(-Z[2],-1,1))/D;
   if(web&&!absolute){
-    S.gotWeb=true;
+    S.gotWeb=true; if(typeof e.webkitCompassAccuracy==='number')S.compAcc=e.webkitCompassAccuracy;
     if(Math.abs(p)<60){ // カメラがほぼ水平のときだけiOSコンパスで補正値を学習
       const off=angDiff(e.webkitCompassHeading,hRel);
       S.sensorOff=S.calibN?norm(S.sensorOff+0.15*angDiff(off,S.sensorOff)):norm(off); S.calibN++;
@@ -231,6 +235,7 @@ async function refreshSpots(){
   const seen=new Set(), out=[];
   for(const s of mts.concat(FALLBACK,pois)){ if(!seen.has(s.name)){seen.add(s.name);out.push(s)} }
   S.spots=out;
+  loadEnv().then(computeVis).catch(e=>{S.debug.envErr=String(e)});
 }
 function enterDemo(msg){
   S.demo=true;
@@ -239,6 +244,92 @@ function enterDemo(msg){
 $('sh').oninput=e=>{S.heading=norm(+e.target.value+S.userOff);$('dh').textContent=e.target.value};
 $('sp').oninput=e=>{S.pitch=+e.target.value;$('dp').textContent=e.target.value};
 
+// ---------- 見通し判定（地形DEM＋OSM建物） ----------
+const DEM={tiles:new Map()};
+function tileXY(lat,lon,z){const n=2**z,x=(lon+180)/360*n,r=lat*D,y=(1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*n;return {x,y}}
+async function loadTile(z,x,y){
+  const key=z+'/'+x+'/'+y; if(DEM.tiles.has(key))return DEM.tiles.get(key);
+  const pr=(async()=>{
+    const r=await fetch(`https://s3.amazonaws.com/elevation-tiles-prod/terrarium/${key}.png`,{mode:'cors'}); if(!r.ok)throw 0;
+    const bm=await createImageBitmap(await r.blob()); const c=document.createElement('canvas'); c.width=bm.width;c.height=bm.height;
+    const g=c.getContext('2d',{willReadFrequently:true}); g.drawImage(bm,0,0); return {w:c.width,d:g.getImageData(0,0,c.width,c.height).data};
+  })().catch(()=>null);
+  DEM.tiles.set(key,pr); const v=await pr; DEM.tiles.set(key,v); return v;
+}
+function elevAt(lat,lon){ // 読込済みタイルから標高(m)。近距離用z13→遠距離用z10の順に参照
+  for(const z of [13,10]){
+    const t=tileXY(lat,lon,z),tx=Math.floor(t.x),ty=Math.floor(t.y),tl=DEM.tiles.get(z+'/'+tx+'/'+ty);
+    if(!tl||tl instanceof Promise)continue;
+    const px=Math.min(tl.w-1,Math.floor((t.x-tx)*tl.w)),py=Math.min(tl.w-1,Math.floor((t.y-ty)*tl.w)),i=(py*tl.w+px)*4,d=tl.d;
+    return d[i]*256+d[i+1]+d[i+2]/256-32768;
+  }
+  return null;
+}
+async function loadEnv(){
+  const {lat,lon}=S.pos, jobs=[];
+  for(const [z,rad] of [[13,3000],[10,CFG.mtRadiusKm*1000]]){
+    const dLat=rad/111320,dLon=rad/(111320*Math.cos(lat*D)),a=tileXY(lat+dLat,lon-dLon,z),b=tileXY(lat-dLat,lon+dLon,z);
+    for(let x=Math.floor(a.x);x<=Math.floor(b.x);x++)for(let y=Math.floor(a.y);y<=Math.floor(b.y);y++)jobs.push(loadTile(z,x,y));
+  }
+  const q=`[out:json][timeout:20];way["building"](around:${CFG.bldgRadius},${lat},${lon});out tags geom;`;
+  const bj=fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)).then(r=>r.json()).catch(()=>null);
+  await Promise.all(jobs); const j=await bj;
+  S.bldgs=[]; if(j&&j.elements){
+    const k=111320*Math.cos(lat*D);
+    for(const w of j.elements){ if(!w.geometry||w.geometry.length<3)continue; const t=w.tags||{};
+      let h=parseFloat(t.height); if(!(h>0))h=(parseFloat(t['building:levels'])||0)*3.2; if(!(h>0))h=10;
+      const pts=w.geometry.map(g=>[(g.lon-lon)*k,(g.lat-lat)*111320]); const cx=pts.reduce((a,p)=>a+p[0],0)/pts.length,cy=pts.reduce((a,p)=>a+p[1],0)/pts.length;
+      S.bldgs.push({pts,h,cx,cy,name:t.name||'',g:null});
+    }
+  }
+  S.debug.env={tiles:jobs.length,bldgs:S.bldgs.length,bOK:!!j};
+}
+function pip(x,y,pts){let c=false;for(let i=0,j=pts.length-1;i<pts.length;j=i++){const [xi,yi]=pts[i],[xj,yj]=pts[j];if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))c=!c}return c}
+function segHit(px,py,qx,qy,pts){ // 原点→(qx,qy)の線分と多角形の最初の交点までの割合
+  let best=null; for(let i=0,j=pts.length-1;i<pts.length;j=i++){
+    const [ax,ay]=pts[j],[bx,by]=pts[i],rx=qx-px,ry=qy-py,sx=bx-ax,sy=by-ay,den=rx*sy-ry*sx; if(Math.abs(den)<1e-9)continue;
+    const t=((ax-px)*sy-(ay-py)*sx)/den,u=((ax-px)*ry-(ay-py)*rx)/den; if(t>0&&t<=1&&u>=0&&u<=1&&(best==null||t<best))best=t;
+  } return best;
+}
+function computeVis(){
+  const {lat,lon}=S.pos, k=111320*Math.cos(lat*D), R=6371000;
+  const g0=elevAt(lat,lon); S.ground=g0; const eye=(g0!=null?g0:0)+S.eyeH;
+  S.inside=null; for(const b of S.bldgs||[]){ if(pip(0,0,b.pts)){S.inside=b;break} }
+  for(const b of S.bldgs||[]){ if(b.g==null){const la=lat+b.cy/111320,lo=lon+b.cx/k;b.g=elevAt(la,lo)} }
+  const ang=(dz,d)=>Math.atan2(dz-0.87*d*d/(2*R),d);
+  let nv=0;
+  for(const sp of S.spots){
+    const d=dist(lat,lon,sp.lat,sp.lon); if(d<30){sp.vis=true;continue}
+    const gT=elevAt(sp.lat,sp.lon), top=sp.kind==='mt'?sp.h:((gT!=null?gT:0)+(sp.h||40));
+    const aT=ang(top-eye,d), edge=Math.max(sp.kind==='mt'?Math.min(sp.r,d*.08):(sp.r||120),d*.03);
+    let blocked=null;
+    // 地形: 視線上を標本化し、手前の地形がターゲット頂部より高く見えるか
+    const n=Math.min(160,Math.max(24,Math.round(d/60)));
+    for(let i=1;i<n;i++){ const s=d*i/n; if(s>d-edge)break;
+      const la=lat+(sp.lat-lat)*i/n, lo=lon+(sp.lon-lon)*i/n, e=elevAt(la,lo); if(e==null)continue;
+      if(ang(e-eye,s)>aT+0.15*D){blocked='地形';break} }
+    // 建物: 手前の建物（自分のいる建物は除く）
+    if(!blocked&&S.bldgs){ const qx=(sp.lon-lon)*k,qy=(sp.lat-lat)*111320;
+      for(const b of S.bldgs){ if(b===S.inside)continue; if(Math.hypot(b.cx,b.cy)>d)continue;
+        const t=segHit(0,0,qx,qy,b.pts); if(t==null)continue; const s=t*d; if(s>d-edge)continue;
+        if(ang((b.g!=null?b.g:(g0||0))+b.h-eye,s)>aT){blocked='建物'+(b.name?'（'+b.name+'）':'');break} } }
+    sp.vis=!blocked; sp.block=blocked; if(sp.vis)nv++;
+  }
+  S.visReady=true; S.debug.vis={n:S.spots.length,visible:nv,eye:Math.round(eye),inside:!!S.inside};
+}
+window.__vis={computeVis,elevAt,DEM};
+$('bEye').onclick=()=>{const L=[1.5,10,30,60,100,200];S.eyeH=L[(L.indexOf(S.eyeH)+1)%L.length];$('bEye').textContent='目線 '+S.eyeH+'m';if(S.visReady)computeVis();toast(`目線の高さを地上${S.eyeH}mにしました（高層階・展望台向け）`)};
+// ---------- 屋内・低精度の検知 ----------
+function envWarn(){
+  if(S.demo)return '';
+  const w=[];
+  if(!S.pos.acc)w.push('現在地を取得中…');
+  else if(S.pos.acc>50)w.push(`位置の精度が低い（±${Math.round(S.pos.acc)}m）。屋内の可能性`);
+  if(S.inside)w.push('建物の中にいるようです。窓から見える方向を狙ってください');
+  if(S.compAcc!=null&&(S.compAcc<0||S.compAcc>20))w.push(`方位が不安定（±${Math.round(S.compAcc)}°）。8の字に振って補正`);
+  if(w.length&&(S.pos.acc>50||S.inside))w.push('屋外・窓際での使用をおすすめします');
+  return w.join(' ／ ');
+}
 // ---------- spot resolver ----------
 function rayAt(x,y){
   const W=innerWidth,H=innerHeight;
@@ -257,11 +348,13 @@ function rayAt(x,y){
 function resolve(x,y){
   const {az,el}=rayAt(x,y);
   const myAlt=(S.pos.alt!=null?S.pos.alt:30), out=[];
+  let hidden=0;
   for(const s of S.spots){
     const d=dist(S.pos.lat,S.pos.lon,s.lat,s.lon); if(d<30)continue;
     const b=bearing(S.pos.lat,S.pos.lon,s.lat,s.lon);
     const tol=clamp(Math.atan((s.r||120)/d)/D,1.0,8);
     const ad=Math.abs(angDiff(b,az)); if(ad>tol*1.5+1)continue;
+    if(!S.demo&&S.visReady&&s.vis===false){hidden++;continue}
     let score=ad/tol;
     if(s.kind==='mt'){
       const elS=Math.atan2(s.h-myAlt-0.87*d*d/(2*6371000),d)/D; // 地球曲率・大気差を簡易補正
@@ -274,8 +367,8 @@ function resolve(x,y){
     out.push({...s,d,b,score});
   }
   out.sort((p,q)=>p.score-q.score);
-  S.debug={...S.debug,az,el};
-  return {list:out.slice(0,3),az};
+  S.debug={...S.debug,az,el,hidden};
+  return {list:out.slice(0,3),az,hidden};
 }
 // ---------- slingshot gesture ----------
 const ov=$('ov'); let timer=null,down=null,vib=n=>{try{navigator.vibrate&&navigator.vibrate(n)}catch(e){}};
@@ -316,7 +409,7 @@ ov.addEventListener('pointerup',end);
 ov.addEventListener('pointercancel',()=>{clearTimeout(timer);down=null;if(S.state==='locked'||S.state==='pulling')cancelLock()});
 function lock(x,y){
   const r=resolve(x,y),c=r.list; S.lockAz=r.az;
-  if(!c.length){down=null;toast('スポットが見つかりません。方向を変えてもう一度');return}
+  if(!c.length){down=null;toast(r.hidden?`この方向のスポット${r.hidden}件は手前の建物や地形に遮られて見えません`:'スポットが見つかりません。方向を変えてもう一度');return}
   S.cand=c; S.sel=c[0]; S.anchor={x,y}; setGain(x,y); S.fx=x; S.fy=y; S.pull=0; S.armed=false; S.finger={x,y}; S.state='locked'; vib(10); SFX.lock(); S.lastStep=0;
   const l=$('label'); l.style.display='block';
   setLabel();
@@ -558,7 +651,7 @@ $('bSnd').onclick=()=>{SND.on=!SND.on;$('bSnd').textContent=SND.on?'🔊':'🔇'
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function fmtD(d){return d>=1000?(d/1000).toFixed(1)+' km':Math.round(d)+' m'}
 let tt=null;function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(tt);tt=setTimeout(()=>t.style.display='none',2600)}
-setInterval(()=>{ const idle=['idle','locked','pulling','choose','ready','firing'].includes(S.state); $('hud').style.display=idle?'block':'none'; $('bSnd').style.display=idle?'block':'none'; $('demo').style.display=(S.demo&&S.state==='idle')?'block':'none'; if(S.demo&&S.state==='idle'){$('sh').value=Math.round(S.heading)%360;$('dh').textContent=Math.round(S.heading)%360;} $('hud').textContent=`方位 ${Math.round(S.heading)}° 仰角 ${Math.round(S.pitch)}° ${S.demo?'[デモ]':''}${S.userOff?' 補正'+(S.userOff>0?'+':'')+Math.round(S.userOff)+'°':''} 精度 ${S.pos.acc?('±'+Math.round(S.pos.acc)+'m'):'-'} スポット ${S.spots.length}`; },300);
+setInterval(()=>{ const idle=['idle','locked','pulling','choose','ready','firing'].includes(S.state); $('hud').style.display=idle?'block':'none'; $('bSnd').style.display=idle?'block':'none'; $('bEye').style.display=(idle&&!S.demo)?'block':'none'; const wt=idle?envWarn():''; $('warn').style.display=wt?'block':'none'; $('warn').textContent='⚠ '+wt; $('demo').style.display=(S.demo&&S.state==='idle')?'block':'none'; if(S.demo&&S.state==='idle'){$('sh').value=Math.round(S.heading)%360;$('dh').textContent=Math.round(S.heading)%360;} $('hud').textContent=`方位 ${Math.round(S.heading)}° 仰角 ${Math.round(S.pitch)}° ${S.demo?'[デモ]':''}${S.userOff?' 補正'+(S.userOff>0?'+':'')+Math.round(S.userOff)+'°':''} 精度 ${S.pos.acc?('±'+Math.round(S.pos.acc)+'m'):'-'} スポット ${S.visReady?S.spots.filter(x=>x.vis!==false).length+'/'+S.spots.length+'(見通し)':S.spots.length}`; },300);
 $('hint').textContent='';
 async function begin(demo){
   audioInit(); unlockVoice();
