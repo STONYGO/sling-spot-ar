@@ -1,16 +1,17 @@
 ---
 owner: claude-cloud
 status: done
-heartbeat: 2026-11-05T07:41:14+08:00
+heartbeat: 2026-11-05T07:42:02+08:00
 branch: night/claude-ar
 base: source (3ad168b)
+pr: https://github.com/STONYGO/sling-spot-ar/pull/1
 created: 2026-11-05
 tags: [sling-spot-ar, 夜間無人タスク, HANDOFF, iPad, 多言語, オフライン, 図鑑]
 ---
 
 # HANDOFF — [[Sling Spot AR]] 夜間タスク（claude-cloud）
 
-対象: `STONYGO/sling-spot-ar`（[[STONY & Co.]]）。PR は `source` 宛て（マージしない）。`main`（公開物）には一切触れていない。
+対象: `STONYGO/sling-spot-ar`（[[STONY & Co.]]）。PR: https://github.com/STONYGO/sling-spot-ar/pull/1（`source` 宛て・マージしていない）。`main`（公開物）には一切触れていない。
 
 ## 依頼内容（要約）
 - ブランチ `night/claude-ar`（`source` を起点）で作業。
