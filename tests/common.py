@@ -61,7 +61,7 @@ class Mock:
         if 'wikidata' in u:
             return await r.fulfill(status=200, content_type='application/json', headers=H, body='{"results":{"bindings":[]}}')
         if m:
-            from urllib.parse import urlparse, parse_qs
+            from urllib.parse import urlparse, parse_qs, quote
             lang = m.group(1); q = parse_qs(urlparse(u).query)
             if 'geosearch' in u:
                 gs = [{'title': t, 'lat': la, 'lon': lo} for t, la, lo in self.geo.get(lang, [])]
@@ -75,7 +75,7 @@ class Mock:
                 a = self.articles.get((lang, title))
                 page = {'title': title}
                 if a:
-                    page.update({'extract': a[0], 'fullurl': f'https://{lang}.wikipedia.org/wiki/{title}'})
+                    page.update({'extract': a[0], 'fullurl': f'https://{lang}.wikipedia.org/wiki/' + quote(title.replace(' ', '_'))})
                     if a[1]: page['pageprops'] = {'wikibase_item': a[1]}
                 else:
                     page['missing'] = ''

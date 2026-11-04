@@ -97,10 +97,23 @@ async def run_combo(b, size, lang, C, orbit=False):
     await ctx.close()
 
 
+async def old_ipados_angle(b, C):
+    """iPadOS 16.3 以前（window.orientation も screen.orientation も無い）でも横持ちの向きを推定する"""
+    for (W, H), X, want in [((1180, 820), [0, 0, 1], 90), ((1180, 820), [0, 0, -1], -90), ((820, 1180), [1, 0, 0], 0)]:
+        ctx = await b.new_context(viewport={'width': W, 'height': H}, user_agent=IPAD_UA); pg = await ctx.new_page()
+        await pg.route('**/*', Mock().route)
+        await pg.add_init_script("try{delete window.orientation}catch(e){};Object.defineProperty(Screen.prototype,'orientation',{get:()=>undefined,configurable:true});" + init_script('ja'))
+        await pg.goto(URL)
+        got = await pg.evaluate("(X)=>{S.forceAngle=null;S.M={X,Y:[0,0,0],Z:[0,-1,0]};return [typeof window.orientation,typeof screen.orientation,scrAngle()]}", X)
+        C.ok(got[2] == want, f'古い iPadOS: {W}x{H} 端末x軸{X} → 画面の角度 {want}', got)
+        await ctx.close()
+
+
 async def main():
     need_build(); C = Check('iPad 表示')
     async with async_playwright() as p:
         b = await p.chromium.launch()
+        await old_ipados_angle(b, C)
         for size, lang in COMBOS:
             await run_combo(b, size, lang, C, orbit=(lang == 'ja' and size in ('air_portrait', 'air_landscape', 'split_half', 'pro13_landscape')))
         await b.close()

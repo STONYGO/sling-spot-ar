@@ -83,6 +83,8 @@ async def run_lang(b, lang, C):
     await grab('図鑑登録', '#got'); await pg.wait_for_timeout(1600); await grab('解説カード', '#card'); await grab('解説ボタン', '#btns')
     card = await pg.evaluate("$('card').innerText")
     C.ok(title in card and ext.split('\n')[0][:6] in card, f'{tag} 解説カードがその言語の記事', card[:80])
+    href = await pg.evaluate("(document.querySelector('#card .src a')||{}).href||''")
+    C.ok(href.startswith(f'https://{lang}.wikipedia.org/wiki/'), f'{tag} 解説カードに出典（その言語の Wikipedia）へのリンク', href)
     await pg.click('#cTagB'); await pg.wait_for_timeout(300); await grab('タグ編集', '#tagSheet'); await pg.click('#tsOk')
     await pg.click('#bBack'); await pg.wait_for_timeout(500)
     # 図鑑（一覧・実績・詳細・削除確認）
@@ -146,12 +148,25 @@ async def default_lang(b, C):
         C.ok(got == want, f'端末の言語 {loc} → 表示 {want}', got); await ctx.close()
 
 
+async def sentence_join(b, C):
+    """解説の要約で文と文の間: 日本語・中国語は詰める、英語・韓国語は空白（従来は英語でも詰まって "data.This" になっていた）"""
+    ctx = await b.new_context(); pg = await ctx.new_page(); await pg.route('**/*', Mock().route); await pg.goto(URL)
+    got = await pg.evaluate("""[clip('Alpha is a test. Beta is a test. Gamma is a test.',170),clip('이것은 테스트이다. 저것도 테스트이다.',170),
+      clip('これはテストである。あれもテストである。',170),clip('這是測試。那也是測試。',170),
+      __buildCards('S1 x. S2 x. S3 x. S4 x. S5 x. S6 x. S7 x. S8 x.')[0].t,__buildCards('一である。二である。三である。四である。五である。六である。七である。八である。')[0].t]""")
+    want = ['Alpha is a test. Beta is a test. Gamma is a test.', '이것은 테스트이다. 저것도 테스트이다.', 'これはテストである。あれもテストである。', '這是測試。那也是測試。',
+            'S1 x. S2 x.', '一である。二である。']
+    C.ok(got == want, '要約の文のつなぎ方が言語に合う', got)
+    await ctx.close()
+
+
 async def main():
     need_build(); C = Check('多言語')
     async with async_playwright() as p:
         b = await p.chromium.launch(args=['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'])
         await ja_regression(b, C)
         await default_lang(b, C)
+        await sentence_join(b, C)
         for lang in ('en', 'zh', 'ko'):
             await run_lang(b, lang, C)
             await boot_texts(b, lang, C)

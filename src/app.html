@@ -384,7 +384,7 @@ Object.assign(T.en,{
  tHidden:'{0} place(s) in this direction are hidden behind buildings or terrain',tNone:'No places found. Try another direction',tCorr:'Compass corrected by {0}°',
  elevL:'Elevation',hdgL:'Bearing',power:'Power {0}%',pullMore:'Pull more',
  tagB:'🏷 Tags',dexB:'📖 Dex',shareB:'📤 Share',
- dexName:'Spot Dex',coverSub:'A record of the views you found',dexCount:'{0} entries',dexHead:'Spot Dex  {0} entries / {1} genres',streak:'🔥 {0}-day streak · today {1}',
+ dexName:'Spot Dex',coverSub:'A record of the views you found',dexCount:'Entries: {0}',dexHead:'Spot Dex  entries: {0} / genres: {1}',streak:'🔥 {0}-day streak · today {1}',
  all:'All',dxEmpty:'No records yet.<br>Aim at a place with the slingshot and fly there to add it here.',dxNoMatch:'No matching records.',
  badgesT:'🏅 Achievements',allRec:'All records',toNext:' / {0} to next',gold:'🥇 Gold',silver:'🥈 Silver',bronze:'🥉 Bronze',
  backDex:'‹ Back to Dex',firstSeen:'First found',timesSeen:'Times seen',times:'{0}×',distFound:'Distance when found',srcC:'Source: ',chkP:' (verify content)',
@@ -530,7 +530,10 @@ window.__geo={dist,bearing};
 function scrAngle(){
   if(S.forceAngle!=null)return S.forceAngle;
   if(typeof window.orientation==='number')return window.orientation;
-  return (screen.orientation&&screen.orientation.angle)||0;
+  if(screen.orientation&&typeof screen.orientation.angle==='number')return screen.orientation.angle;
+  // iPadOS 16.3 以前の Safari（デスクトップ表示）はどちらの API も無い → 画面が横長なら、端末の x 軸が上下どちらを向くかで横持ちの向きを推定【要確認：実機】
+  if(innerWidth>innerHeight&&S.M)return S.M.X[2]>=0?90:-90;
+  return 0;
 }
 function onOri(e){
   if(S.demo||e.beta==null)return;
@@ -981,9 +984,11 @@ function say(text,onend,lang){
 function unlockVoice(){ try{ if(window.speechSynthesis){const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);} }catch(e){} }
 
 // ---------- explanation ----------
+// 文をつなぐ（「。」で終わる日本語・中国語は詰め、英語・韓国語などは空白を入れる）
+function joinS(a,b){ return a&&!/[。．！？]$/.test(a)?a+' '+b:a+b; }
 function clip(t,max){
   const ss=t.replace(/\s+/g,' ').split(/(?<=[。．]|\. )/).map(x=>x.trim()).filter(Boolean); let o='';
-  for(const x of ss){ if(o&&o.length+x.length>max)break; o+=x; }
+  for(const x of ss){ if(o&&o.length+x.length>max)break; o=joinS(o,x); }
   return o||t.slice(0,max);
 }
 function buildCards(ex){
@@ -998,7 +1003,7 @@ function buildCards(ex){
   if(cards.length<2&&intro){ // 章立てが乏しい記事は導入文を分割
     const ss=intro.split(/(?<=[。．]|\. )/).map(x=>x.trim()).filter(Boolean); cards.length=0;
     const n=Math.min(4,ss.length),per=Math.ceil(ss.length/n);
-    for(let i=0;i<n;i++){const t=ss.slice(i*per,(i+1)*per).join('');if(t)cards.push({t:clip(t,190)})}
+    for(let i=0;i<n;i++){const t=ss.slice(i*per,(i+1)*per).reduce(joinS,'');if(t)cards.push({t:clip(t,190)})}
     cards.forEach((c,i)=>c.h=i===0?t('ov'):`${t('expl')} ${i+1}/${cards.length}`);
   }
   return cards;
