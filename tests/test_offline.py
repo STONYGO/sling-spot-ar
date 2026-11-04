@@ -32,6 +32,11 @@ async def app_offline(b, C):
     await pg.evaluate("saveArea()"); await pg.wait_for_function("!$('bOff').disabled&&JSON.parse(localStorage.getItem('area:ja')||'{}').nEx!=null", timeout=60000)
     info = await pg.evaluate("[$('offInfo').textContent,JSON.parse(localStorage.getItem('area:ja')).spots.length]")
     C.ok(info[0].startswith('保存済み：') and info[1] > 0, 'この周辺を保存できる', info)
+    # 1b) 通信できないときに「保存」しても、保存済みデータを上書きせず「保存できない」と知らせる
+    before = await pg.evaluate("localStorage.getItem('area:ja')"); mock.online = False
+    await pg.evaluate("saveArea()"); await pg.wait_for_timeout(300)
+    after = await pg.evaluate("[localStorage.getItem('area:ja'),$('toast').textContent,$('bOff').disabled]"); mock.online = True
+    C.ok(after[0] == before and '保存できませんでした' in after[1] and after[2] is False, 'オフラインで保存を押しても保存済みデータを上書きしない', after[1:])
     # 2) 再読み込み後も「保存済み」と表示（従来は初期文に戻っていた）
     await pg.reload(); await pg.wait_for_timeout(300)
     C.ok((await pg.evaluate("$('offInfo').textContent")).startswith('保存済み：'), '再読み込み後も保存済みと表示される')

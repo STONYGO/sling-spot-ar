@@ -301,6 +301,7 @@ const T={
 };
 // ---- 画面文言（v1.0-beta まで日本語固定だった箇所）。{0} {1}… は差し込み。中国語（繁體）・韓国語は【要確認】ネイティブ確認推奨 ----
 Object.assign(T.ja,{
+ tSaveNoNet:'通信できないため保存できませんでした。電波のある場所でもう一度お試しください',
  dot:' ・ ',
  colon:'：',
  appName:'Sling Spot AR（仮称）',
@@ -349,6 +350,7 @@ Object.assign(T.ja,{
  bd1:'はじめての発見',bd2:'コレクター 10件',bd3:'マスター 30件',bd4:'5ジャンル制覇',bd5:'山の達人 5座',bd6:'車窓ハンター 5件',bd7:'3日連続'
 });
 Object.assign(T.en,{
+ tSaveNoNet:'Could not save because there is no connection. Try again where you have a signal.',
  dot:' · ',
  colon:': ',
  appName:'Sling Spot AR (working title)',
@@ -397,6 +399,7 @@ Object.assign(T.en,{
  bd1:'First discovery',bd2:'Collector: 10',bd3:'Master: 30',bd4:'5 genres',bd5:'Mountaineer: 5 peaks',bd6:'Window spotter: 5',bd7:'3-day streak'
 });
 Object.assign(T.zh,{
+ tSaveNoNet:'因無法連線，未能保存。請在有訊號的地方再試一次。',
  dot:' · ',
  colon:'：',
  appName:'Sling Spot AR（暫定名稱）',
@@ -445,6 +448,7 @@ Object.assign(T.zh,{
  bd1:'首次發現',bd2:'收藏家 10 處',bd3:'大師 30 處',bd4:'制霸 5 類',bd5:'登山達人 5 座',bd6:'車窗獵人 5 處',bd7:'連續 3 天'
 });
 Object.assign(T.ko,{
+ tSaveNoNet:'연결할 수 없어 저장하지 못했습니다. 신호가 있는 곳에서 다시 시도하세요.',
  dot:' · ',
  colon:': ',
  appName:'Sling Spot AR (가칭)',
@@ -1386,7 +1390,9 @@ async function saveArea(){
   const P={...S.pos}; $('bOff').disabled=true; set(.02);
   const store=x=>{ try{ localStorage.setItem('area:'+wl(),JSON.stringify({lat:P.lat,lon:P.lon,t:Date.now(),spots:S.spots.slice(0,700),...x})); }catch(e){} };
   try{
-    S.fetchCtr=null; S.fetching=0; await refreshSpots(); set(.1); store({});
+    S.fetchCtr=null; S.fetching=0; await refreshSpots(); set(.1);
+    const f=S.debug.fetch; if(S.debug.offline||!f||(f.wp!=='fulfilled'&&f.wd!=='fulfilled')){ bar.parentNode.style.display='none'; toast(t('tSaveNoNet')); return; } // 通信できないときは保存済みデータを上書きしない
+    store({});
     const top=S.spots.map(s=>({s,d:dist(P.lat,P.lon,s.lat,s.lon)})).filter(x=>x.d<(x.s.kind==='mt'?CFG.mtRadiusKm*1000:10000))
       .sort((a,b)=>((b.s.kind==='mt'?2:1)/(1+b.d/3000))-((a.s.kind==='mt'?2:1)/(1+a.d/3000))).slice(0,CFG.offlineSpots);
     let done=0; const total=top.length*2;
@@ -1715,8 +1721,8 @@ function layoutTop(){
   if(avail>=220){ hud.style.top=''; hud.style.maxWidth=avail+'px'; } else { hud.style.top=(btns?r.bottom+6:safeT)+'px'; hud.style.maxWidth=(W-20)+'px'; }
   const vis=e=>e.style.display!=='none'&&getComputedStyle(e).display!=='none', bot=e=>vis(e)?e.getBoundingClientRect().bottom:0;
   const top=Math.max(bot(hud),btns?r.bottom:0,safeT)+6;
-  $('warn').style.top=top+'px'; $('boot').style.top=top+'px';
-  const lt=Math.max(60,Math.max(top-6,bot($('warn')),bot($('boot')))+8);
+  $('boot').style.top=top+'px'; const bb=bot($('boot')); $('warn').style.top=(bb?bb+6:top)+'px'; // 起動チェックと警告が同時に出るときは縦に並べる
+  const lt=Math.max(60,Math.max(top-6,bot($('warn')),bb)+8);
   $('label').style.top=lt+'px'; $('chips').style.top=(lt+44)+'px';
 }
 $('hint').textContent='';

@@ -113,12 +113,14 @@ async def boot_texts(b, lang, C):
       DeviceOrientationEvent.requestPermission=()=>Promise.resolve('granted');
       setTimeout(()=>{ setInterval(()=>{ const ev=new DeviceOrientationEvent('deviceorientation',{alpha:0,beta:88,gamma:0,absolute:false});
         Object.defineProperty(ev,'webkitCompassHeading',{value:0}); window.dispatchEvent(ev); },60); },600);"""
-    ctx = await b.new_context(viewport={'width': 820, 'height': 1180}, has_touch=True, permissions=['geolocation'], geolocation={'latitude': SENDAI[0], 'longitude': SENDAI[1], 'accuracy': 15})
+    ctx = await b.new_context(viewport={'width': 820, 'height': 1180}, has_touch=True, permissions=['geolocation'], geolocation={'latitude': SENDAI[0], 'longitude': SENDAI[1], 'accuracy': 120})
     pg = await ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
     mock = Mock(); mock.geo[lang] = SPOTS[lang]; await pg.route('**/*', mock.route)
     await pg.add_init_script(init); await pg.goto(URL); await pg.wait_for_timeout(300)
     await pg.click('#bStart'); await pg.wait_for_timeout(3500)
     txt = await pg.evaluate("[...document.querySelectorAll('#bootL div')].map(d=>d.textContent).join(' | ')+' | '+$('boot').querySelector('b').textContent")
+    ov = await pg.evaluate("(()=>{const a=$('boot').getBoundingClientRect(),w=$('warn'),b=w.getBoundingClientRect();return [getComputedStyle(w).display!=='none'&&getComputedStyle($('boot')).display!=='none',a.bottom<=b.top||b.bottom<=a.top,w.textContent]})()")
+    C.ok(ov[0] and ov[1], f'[{lang}] 起動チェックと警告（低精度）が同時に出ても重ならない', ov)
     bad = bad_text(lang, txt)
     C.ok(not bad, f'[{lang}] 起動チェックに日本語が残っていない', f'{bad} :: {txt}')
     C.ok(not errs, f'[{lang}] 起動時のページエラーなし', errs)
